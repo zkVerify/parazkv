@@ -11,13 +11,19 @@
 // args can be passed from the .zndsl file as a comma-separated list of values, surrounded
 // by double quotes
 
+const ReturnCode = {
+  Ok: 1,
+  ErrPayerNewBalanceIncorrect: 2,
+  ErrPayeeNewBalanceIncorrect: 3,
+};
+
 async function run(nodeName, networkInfo, args) {
   const { wsUri, userDefinedTypes } = networkInfo.nodesByName[nodeName];
   const api = await zombie.connect(wsUri, userDefinedTypes);
 
   // This is not really used by this test, but shows how to get the current block number
   const current_block_number = await api.query.system.number();
-  console.log('Current block number: ' + current_block_number);
+  console.log(`Current block number: ${current_block_number}`);
 
   // // This also is not used, but shows how to interact with Granpa pallet
   // const granpa_current_set_id = await api.query.grandpa.currentSetId();
@@ -41,8 +47,8 @@ async function run(nodeName, networkInfo, args) {
   // Collect Alice's and Bob's free balances
   let balance_alice = (await api.query.system.account(ALICE))["data"]["free"];
   let balance_bob = (await api.query.system.account(BOB))["data"]["free"];
-  console.log('Alice\'s balance: ' + balance_alice.toHuman());
-  console.log('Bob\'s balance:   ' + balance_bob.toHuman());
+  console.log(`Alice\'s balance: ${balance_alice.toHuman()}`);
+  console.log(`Bob\'s balance:   ${balance_bob.toHuman()}`);
 
   // Create an extrinsic, transferring 1 token unit to Bob.
   const transfer = await api.tx.balances.transferAllowDeath(BOB, 1);
@@ -102,12 +108,20 @@ async function run(nodeName, networkInfo, args) {
     );
 
   // Get the updated balances
-  balance_alice = (await api.query.system.account(ALICE))["data"]["free"];
-  balance_bob = (await api.query.system.account(BOB))["data"]["free"];
-  console.log('Alice\'s balance after tx: ' + balance_alice.toHuman());
-  console.log('Bob\'s balance after tx:   ' + balance_bob.toHuman());
+  let new_balance_alice = (await api.query.system.account(ALICE))["data"]["free"];
+  let new_balance_bob = (await api.query.system.account(BOB))["data"]["free"];
+  console.log(`Alice\'s balance after tx: ${new_balance_alice.toHuman()}`);
+  console.log(`Bob\'s balance after tx:   ${new_balance_bob.toHuman()}`);
 
-  return balance_alice;
+  if (!new_balance_alice < balance_alice) {
+    return ReturnCode.ErrPayerNewBalanceIncorrect;
+  }
+
+  if (new_balance_bob != balance_bob + 1) {
+    return ReturnCode.ErrPayeeNewBalanceIncorrect;
+  }
+
+  return ReturnCode.Ok;
 }
 
 module.exports = { run }
