@@ -1,2 +1,5 @@
-Cargo.lock
 target
+relay-bin
+zombienet-tests/bin
+zombienet-tests/node_modules
+zombienet-tests/yarn.lock
