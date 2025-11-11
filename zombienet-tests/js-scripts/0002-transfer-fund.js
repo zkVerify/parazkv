@@ -100,6 +100,7 @@ async function run(nodeName, networkInfo, args) {
         console.log("Transaction successfully finalized and included in a block")
       },
       error => {
+        console.log(`Error: ${error}`);
         return -1;
       }
     );
