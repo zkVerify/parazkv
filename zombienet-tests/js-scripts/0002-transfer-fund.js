@@ -33,6 +33,9 @@ async function run(nodeName, networkInfo, args) {
   const ALICE = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
   const BOB = '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty';
 
+  // Amount to transfer from Alice to Bob
+  const AMOUNT = 1;
+
   // Build a keyring and import Alice's credential
   // There's no documentation on that, it has been deducted from:
   // javascript/packages/orchestrator/src/test-runner/assertion.ts
@@ -50,8 +53,8 @@ async function run(nodeName, networkInfo, args) {
   console.log(`Alice\'s balance: ${balance_alice.toHuman()}`);
   console.log(`Bob\'s balance:   ${balance_bob.toHuman()}`);
 
-  // Create an extrinsic, transferring 1 token unit to Bob.
-  const transfer = await api.tx.balances.transferAllowDeath(BOB, 1);
+  // Create an extrinsic, transferring AMOUNT token units to Bob.
+  const transfer = await api.tx.balances.transferAllowDeath(BOB, AMOUNT);
 
   // We sign and submit the extrinsic. We need to surround the execution of the api call
   // around a Promise to block the test until the transaction gets finalized, thus
@@ -113,11 +116,11 @@ async function run(nodeName, networkInfo, args) {
   console.log(`Alice\'s balance after tx: ${new_balance_alice.toHuman()}`);
   console.log(`Bob\'s balance after tx:   ${new_balance_bob.toHuman()}`);
 
-  if (!(new_balance_alice < balance_alice)) {
+  if (!(new_balance_alice < balance_alice - AMOUNT)) {
     return ReturnCode.ErrPayerNewBalanceIncorrect;
   }
 
-  if (new_balance_bob != balance_bob + 1) {
+  if (new_balance_bob != balance_bob + AMOUNT) {
     return ReturnCode.ErrPayeeNewBalanceIncorrect;
   }
 
