@@ -29,10 +29,6 @@ async function run(nodeName, networkInfo, args) {
   // const granpa_current_set_id = await api.query.grandpa.currentSetId();
   // const granpa_authorities = await api.query.grandpa.authorities();
 
-  // Define Alice and Bob's addresses
-  const ALICE = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
-  const BOB = '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty';
-
   // Fixed amount of tokens to transfer from Alice to Bob
   const AMOUNT = 1;
 
@@ -43,18 +39,16 @@ async function run(nodeName, networkInfo, args) {
   //    ApiPromise, Keyring, WsProvider, util: utilCrypto, connect(), registerParachain()
   const keyring = new zombie.Keyring({ type: 'sr25519' });
   const alice = keyring.addFromUri('//Alice');
-
-  console.log(`Alice's address: ${alice.address}`);
-  console.log(`ALICE: ${ALICE}`);
+  const bob = keyring.addFromUri('//Bob');
 
   // Collect Alice's and Bob's free balances
-  let balance_alice = (await api.query.system.account(ALICE))["data"]["free"];
-  let balance_bob = (await api.query.system.account(BOB))["data"]["free"];
+  let balance_alice = (await api.query.system.account(alice.address))["data"]["free"];
+  let balance_bob = (await api.query.system.account(bob.address))["data"]["free"];
   console.log(`Alice\'s balance: ${balance_alice.toHuman()}`);
   console.log(`Bob\'s balance:   ${balance_bob.toHuman()}`);
 
   // Create an extrinsic, transferring AMOUNT token units to Bob.
-  const transfer = await api.tx.balances.transferAllowDeath(BOB, AMOUNT);
+  const transfer = await api.tx.balances.transferAllowDeath(bob.address, AMOUNT);
 
   // We sign and submit the extrinsic. We need to surround the execution of the api call
   // around a Promise to block the test until the transaction gets finalized, thus
@@ -111,12 +105,12 @@ async function run(nodeName, networkInfo, args) {
     );
 
   // Get the updated balances
-  let new_balance_alice = (await api.query.system.account(ALICE))["data"]["free"];
-  let new_balance_bob = (await api.query.system.account(BOB))["data"]["free"];
+  let new_balance_alice = (await api.query.system.account(alice.address))["data"]["free"];
+  let new_balance_bob = (await api.query.system.account(bob.address))["data"]["free"];
   console.log(`Alice\'s balance after tx: ${new_balance_alice.toHuman()}`);
   console.log(`Bob\'s balance after tx:   ${new_balance_bob.toHuman()}`);
 
-  if (!(new_balance_alice < balance_alice - AMOUNT)) {
+  if (new_balance_alice >= balance_alice - AMOUNT) {
     return ReturnCode.ErrPayerNewBalanceIncorrect;
   }
 
