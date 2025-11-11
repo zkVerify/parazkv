@@ -33,7 +33,7 @@ async function run(nodeName, networkInfo, args) {
   const ALICE = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
   const BOB = '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty';
 
-  // Amount to transfer from Alice to Bob
+  // Fixed amount of tokens to transfer from Alice to Bob
   const AMOUNT = 1;
 
   // Build a keyring and import Alice's credential
