@@ -113,7 +113,7 @@ async function run(nodeName, networkInfo, args) {
   console.log(`Alice\'s balance after tx: ${new_balance_alice.toHuman()}`);
   console.log(`Bob\'s balance after tx:   ${new_balance_bob.toHuman()}`);
 
-  if (!new_balance_alice < balance_alice) {
+  if (!(new_balance_alice < balance_alice)) {
     return ReturnCode.ErrPayerNewBalanceIncorrect;
   }
 
