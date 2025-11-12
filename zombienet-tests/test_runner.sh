@@ -128,7 +128,7 @@ for TESTNAME in "${TEST_LIST[@]}"; do
     fi
 done
 
-# Print a fancy table summarizing the test suit run
+# Print a fancy table summarizing the test suite run
 echo -e "\n\n\n"
 echo -e "┌────────────────────────────────────────────────────────────────────────┐"
 echo -e "│                              ${TXT_BIYLW}TEST SUMMARY${TXT_NORML}                              │"
