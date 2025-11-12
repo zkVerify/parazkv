@@ -3,6 +3,7 @@
 ZOMBIENET_V=v1.3.128
 BIN_DIR=relay-bin
 CHAIN=${CHAIN:-"local"}
+ZOMBIENET_BIN_DIR=zombienet-tests/bin
 
 case "$(uname -s)" in
     Linux*)     MACHINE=Linux;;
@@ -25,7 +26,6 @@ elif [ $MACHINE = "Mac" ]; then
         ZOMBIENET_BIN="zombienet-macos-x64"
     fi
 fi
-
 
 
 build_zkVerify() {
@@ -51,10 +51,15 @@ build_zkVerify() {
 }
 
 zombienet_init() {
-  if [ ! -f $ZOMBIENET_BIN ]; then
+  if [ ! -d $ZOMBIENET_BIN_DIR ]; then
+    mkdir -p "./${ZOMBIENET_BIN_DIR}"
+  fi
+
+  if [ ! -f "${ZOMBIENET_BIN_DIR}/${ZOMBIENET_BIN}" ]; then
     echo "fetching zombienet executable..."
     curl -LO https://github.com/paritytech/zombienet/releases/download/$ZOMBIENET_V/$ZOMBIENET_BIN
     chmod +x $ZOMBIENET_BIN
+    mv $ZOMBIENET_BIN "${ZOMBIENET_BIN_DIR}"
   fi
   if [ ! -f $BIN_DIR/zkv-relay ]; then
    echo "Fetch_zkVerify() not yet implemented: you must execute 'zombienet build'"
@@ -66,10 +71,15 @@ zombienet_init() {
 }
 
 zombienet_build() {
-  if [ ! -f $ZOMBIENET_BIN ]; then
+  if [ ! -d $ZOMBIENET_BIN_DIR ]; then
+    mkdir -p "./${ZOMBIENET_BIN_DIR}"
+  fi
+  
+  if [ ! -f "${ZOMBIENET_BIN_DIR}/${ZOMBIENET_BIN}" ]; then
     echo "fetching zombienet executable..."
     curl -LO https://github.com/paritytech/zombienet/releases/download/$ZOMBIENET_V/$ZOMBIENET_BIN
     chmod +x $ZOMBIENET_BIN
+    mv $ZOMBIENET_BIN "${ZOMBIENET_BIN_DIR}"
   fi
   if [ ! -f $BIN_DIR/zkv-relay ]; then
     build_zkVerify
@@ -81,7 +91,7 @@ zombienet_devnet() {
   # cargo build --release
   echo "spawning local relay chain plus devnet ${CHAIN} as a parachain..."
   local dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-  ./$ZOMBIENET_BIN spawn "$dir/../zombienet-config/devnet-${CHAIN}.toml" -p native
+  ./$ZOMBIENET_BIN_DIR/$ZOMBIENET_BIN spawn "$dir/../zombienet-config/devnet-${CHAIN}.toml" -p native
 }
 
 
