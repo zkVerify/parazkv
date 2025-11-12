@@ -74,7 +74,7 @@ zombienet_build() {
   if [ ! -d $ZOMBIENET_BIN_DIR ]; then
     mkdir -p "./${ZOMBIENET_BIN_DIR}"
   fi
-  
+
   if [ ! -f "${ZOMBIENET_BIN_DIR}/${ZOMBIENET_BIN}" ]; then
     echo "fetching zombienet executable..."
     curl -LO https://github.com/paritytech/zombienet/releases/download/$ZOMBIENET_V/$ZOMBIENET_BIN
@@ -91,6 +91,8 @@ zombienet_devnet() {
   # cargo build --release
   echo "spawning local relay chain plus devnet ${CHAIN} as a parachain..."
   local dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+  # new_id=1234
+  # sed -i -E 's/^id\s*=\s*.*/id = ${new_id}/' "$dir/../zombienet-config/devnet-${CHAIN}.toml"
   ./$ZOMBIENET_BIN_DIR/$ZOMBIENET_BIN spawn "$dir/../zombienet-config/devnet-${CHAIN}.toml" -p native
 }
 
