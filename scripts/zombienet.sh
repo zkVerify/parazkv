@@ -27,6 +27,8 @@ elif [ $MACHINE = "Mac" ]; then
     fi
 fi
 
+ZOMBIENET=${ZOMBIENET_BIN_DIR}/${ZOMBIENET_BIN}
+
 
 build_zkVerify() {
   echo "cloning zkVerify repository..."
@@ -55,7 +57,7 @@ zombienet_init() {
     mkdir -p "./${ZOMBIENET_BIN_DIR}"
   fi
 
-  if [ ! -f "${ZOMBIENET_BIN_DIR}/${ZOMBIENET_BIN}" ]; then
+  if [ ! -f $ZOMBIENET ]; then
     echo "fetching zombienet executable..."
     curl -LO https://github.com/paritytech/zombienet/releases/download/$ZOMBIENET_V/$ZOMBIENET_BIN
     chmod +x $ZOMBIENET_BIN
@@ -75,7 +77,7 @@ zombienet_build() {
     mkdir -p "./${ZOMBIENET_BIN_DIR}"
   fi
 
-  if [ ! -f "${ZOMBIENET_BIN_DIR}/${ZOMBIENET_BIN}" ]; then
+  if [ ! -f $ZOMBIENET ]; then
     echo "fetching zombienet executable..."
     curl -LO https://github.com/paritytech/zombienet/releases/download/$ZOMBIENET_V/$ZOMBIENET_BIN
     chmod +x $ZOMBIENET_BIN
