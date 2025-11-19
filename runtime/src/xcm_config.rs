@@ -20,6 +20,7 @@ use frame_system::EnsureRoot;
 use pallet_xcm::XcmPassthrough;
 use parachains_common::xcm_config::ConcreteAssetFromSystem;
 use polkadot_runtime_common::impls::ToAuthor;
+use sp_core::blake2_256;
 use xcm::latest::prelude::*;
 use xcm_builder::{
     AccountId32Aliases, AllowUnpaidExecutionFrom, EnsureXcmOrigin, FixedWeightBounds,
@@ -27,13 +28,17 @@ use xcm_builder::{
     ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative, SignedAccountId32AsNative,
     SignedToAccountId32, SovereignSignedViaLocation, UsingComponents, WithUniqueTopic,
 };
+use xcm_builder::{DescribeAllTerminal, DescribeFamily, DescribeLocation};
+use xcm_executor::traits::ConvertLocation;
 use xcm_executor::XcmExecutor;
 
 parameter_types! {
     pub const RelayLocation: Location = Location::parent();
     pub const RelayNetwork: Option<NetworkId> = Some(NetworkId::Polkadot);
+    // VS pub const RelayNetwork: Option<NetworkId> = Some(NetworkId::ByGenesis(ZKV_GENESIS_HASH));
     pub RelayChainOrigin: RuntimeOrigin = cumulus_pallet_xcm::Origin::Relay.into();
     pub UniversalLocation: InteriorLocation = Parachain(ParachainInfo::parachain_id().into()).into();
+    // VS pub UniversalLocation: InteriorLocation = [GlobalConsensus(RelayNetwork::get().unwrap()), Parachain(ParachainInfo::parachain_id().into())].into();
     pub CheckAccount: AccountId = XcmPallet::check_account();
     pub LocalCheckAccount: (AccountId, MintLocation) = (CheckAccount::get(), MintLocation::Local);
 }
@@ -44,9 +49,23 @@ parameter_types! {
 pub type LocationToAccountId = (
     // The parent (Relay-chain) origin converts to the parent `AccountId`.
     ParentIsPreset<AccountId>,
-    //// Straight up local `AccountId32` origins just alias directly to `AccountId`.
+    // Straight up local `AccountId32` origins just alias directly to `AccountId`.
     AccountId32Aliases<RelayNetwork, AccountId>,
+    // Foreign locations alias into accounts according to a hash of their standard description
+    // (e.g. remote origins).
+    HashedDescription<AccountId, DescribeFamily<DescribeAllTerminal>>,
 );
+
+pub struct HashedDescription<AccountId, Describe>(core::marker::PhantomData<(AccountId, Describe)>);
+impl<AccountId: From<[u8; 32]> + Clone + alloc::fmt::Debug, Describe: DescribeLocation>
+    ConvertLocation<AccountId> for HashedDescription<AccountId, Describe>
+{
+    fn convert_location(value: &Location) -> Option<AccountId> {
+        let acc_id = blake2_256(&Describe::describe_location(value)?).into();
+        log::info!("{acc_id:?}");
+        Some(acc_id)
+    }
+}
 
 /// Means for transacting assets on this chain.
 pub type LocalAssetTransactor = FungibleAdapter<
@@ -122,30 +141,45 @@ pub struct XcmConfig;
 impl xcm_executor::Config for XcmConfig {
     type RuntimeCall = RuntimeCall;
     type XcmSender = XcmRouter;
-    type XcmRecorder = ();
+    type XcmRecorder = (); // VS ZKVXcm
+
     // How to withdraw and deposit an asset.
-    type AssetTransactor = LocalAssetTransactor;
+    type AssetTransactor = LocalAssetTransactor; // VS AssetTransactors
     type OriginConverter = XcmOriginToTransactDispatchOrigin;
     type IsReserve = NativeAsset;
     type IsTeleporter = TrustedTeleporters;
     type UniversalLocation = UniversalLocation;
     type Barrier = Barrier;
     type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
+    // VS type Weigher = WeightInfoBounds<XcmZKVEvmWeight<RuntimeCall>, RuntimeCall, MaxInstructions>;
     type Trader =
         UsingComponents<WeightToFee, RelayLocation, AccountId, Balances, ToAuthor<Runtime>>;
-    type ResponseHandler = XcmPallet;
-    type AssetTrap = XcmPallet;
-    type AssetClaims = XcmPallet;
+    // VS
+    // type Trader = UsingComponents<
+    //     <Runtime as pallet_transaction_payment::Config>::WeightToFee,
+    //     RelayLocation,
+    //     AccountId,
+    //     Balances,
+    //     ResolveTo<StakingPot, Balances>,
+    // >;
+    type ResponseHandler = XcmPallet; // VS ZKVXcm
+    type AssetTrap = XcmPallet; // VS ZKVXcm
+    type AssetClaims = XcmPallet; // VS ZKVXcm
     type SubscriptionService = XcmPallet;
     type PalletInstancesInfo = AllPalletsWithSystem;
     type MaxAssetsIntoHolding = MaxAssetsIntoHolding;
     type AssetLocker = ();
     type AssetExchanger = ();
     type FeeManager = ();
+    // VS
+    // type FeeManager = XcmFeeManagerFromComponents<
+    //     WaivedLocations,
+    //     SendXcmFeeToAccount<AssetTransactors, StakingPot>,
+    // >;
     type MessageExporter = ();
     type UniversalAliases = Nothing;
-    type CallDispatcher = RuntimeCall;
-    type SafeCallFilter = Everything;
+    type CallDispatcher = RuntimeCall; // VS RemoteEVMCall
+    type SafeCallFilter = Everything; // VS SafeCallFilter
     type Aliasers = Nothing;
     type TransactionalProcessor = FrameTransactionalProcessor;
     type HrmpNewChannelOpenRequestHandler = ();
@@ -175,8 +209,9 @@ impl pallet_xcm::Config for Runtime {
     // Needs to be `Everything` for local testing.
     type XcmExecutor = XcmExecutor<XcmConfig>;
     type XcmTeleportFilter = Everything;
-    type XcmReserveTransferFilter = Everything;
+    type XcmReserveTransferFilter = Everything; // VS Nothing
     type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
+    // VS type Weigher = WeightInfoBounds<XcmZKVEvmWeight<RuntimeCall>, RuntimeCall, MaxInstructions>;
     type UniversalLocation = UniversalLocation;
     type RuntimeOrigin = RuntimeOrigin;
     type RuntimeCall = RuntimeCall;
@@ -188,10 +223,11 @@ impl pallet_xcm::Config for Runtime {
     type CurrencyMatcher = ();
     type TrustedLockers = ();
     type SovereignAccountOf = LocationToAccountId;
-    type MaxLockers = ConstU32<8>;
+    type MaxLockers = ConstU32<8>; // VS MaxLockers
     type WeightInfo = pallet_xcm::TestWeightInfo;
+    // VS type WeightInfo = weights::pallet_xcm::ZKVEvmWeight<Runtime>;
     type AdminOrigin = EnsureRoot<AccountId>;
-    type MaxRemoteLockConsumers = ConstU32<0>;
+    type MaxRemoteLockConsumers = ConstU32<0>; // VS MaxLockers
     type RemoteLockConsumerIdentifier = ();
 }
 
