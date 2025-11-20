@@ -1,4 +1,4 @@
-const { BN, compactAddLength, u8aToHex } = require('@polkadot/util');
+const { BN } = require('@polkadot/util');
 const { decodeAddress } = require("@polkadot/keyring");
 
 const fs = require('fs');
@@ -26,7 +26,11 @@ async function run(nodeName, networkInfo, args) {
     const amount = args[0];
     const benef = args[1]; // DIMITRI = "5G6DXujt47QrKcrZ1wAbr3SJxXRZLKkkv7vzfSHHbDtJzZZo";
 
-    console.log(`benef = 0x${Array.from(decodeAddress(benef), b => b.toString(16).padStart(2, "0")).join("")}`);
+    const benef_id = decodeAddress(benef);
+
+    console.log(`beneficiary's SS58 address is: ${benef}`);
+    const benef_id_hex = Array.from(benef_id, b => b.toString(16).padStart(2, "0")).join("");
+    console.log(`beneficiary's id is: 0x${benef_id_hex}`);
 
     // 1. Create an XCM teleport extrinsic, teleporting _amount_ tokens to _benef_
     const dest = {
@@ -44,7 +48,7 @@ async function run(nodeName, networkInfo, args) {
                 X1: [{
                     AccountId32: {
                         network: null,
-                        id: decodeAddress(benef),
+                        id: benef_id,
                     },
                 }]
             },
@@ -75,7 +79,7 @@ async function run(nodeName, networkInfo, args) {
     // 2. Verify the cost of the teleport above
 
     // Get the updated balances
-    balance_alice_post = (await api.query.system.account(alice.address))["data"]["free"];
+    let balance_alice_post = (await api.query.system.account(alice.address))["data"]["free"];
     console.log('Alice\'s balance after tx: ' + balance_alice_post.toHuman());
 
     let paid = balance_alice_pre.sub(balance_alice_post);

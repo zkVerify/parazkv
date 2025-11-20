@@ -7,7 +7,7 @@
 const { BN } = require('@polkadot/util');
 const { decodeAddress } = require("@polkadot/keyring");
 
-const { BLOCK_TIME, receivedEvents, submitExtrinsic } = require('zkv-lib');
+const { BLOCK_TIME } = require('zkv-lib');
 
 const ReturnCode = {
     Ok: 1,
