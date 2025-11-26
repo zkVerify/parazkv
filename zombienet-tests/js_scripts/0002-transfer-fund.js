@@ -12,9 +12,9 @@
 // by double quotes
 
 const ReturnCode = {
-  Ok: 1,
-  ErrPayerNewBalanceIncorrect: 2,
-  ErrPayeeNewBalanceIncorrect: 3,
+  Ok: 0,
+  ErrPayerNewBalanceIncorrect: 1,
+  ErrPayeeNewBalanceIncorrect: 2,
 };
 
 async function run(nodeName, networkInfo, args) {
