@@ -28,13 +28,13 @@ use sp_runtime::{
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 
-use cumulus_primitives_core::{AggregateMessageOrigin, ParaId};
+use cumulus_primitives_core::AggregateMessageOrigin;
 use frame_support::{
     construct_runtime, derive_impl,
     dispatch::DispatchClass,
     genesis_builder_helper::{build_state, get_preset},
     parameter_types,
-    traits::{ConstBool, ConstU32, ConstU64, ConstU8, TransformOrigin},
+    traits::{ConstBool, ConstU32, ConstU64, ConstU8},
     weights::{
         constants::WEIGHT_REF_TIME_PER_SECOND, ConstantMultiplier, Weight, WeightToFeeCoefficient,
         WeightToFeeCoefficients, WeightToFeePolynomial,
@@ -46,10 +46,8 @@ use frame_system::{
     EnsureRoot,
 };
 
-use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 pub use sp_runtime::{MultiAddress, Perbill, Permill};
-use xcm_config::XcmOriginToTransactDispatchOrigin;
 
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
@@ -213,9 +211,10 @@ pub const HOURS: BlockNumber = MINUTES * 60;
 pub const DAYS: BlockNumber = HOURS * 24;
 
 // Unit = the base number of indivisible units for balances
-pub const UNIT: Balance = 1_000_000_000_000;
-pub const MILLIUNIT: Balance = 1_000_000_000;
-pub const MICROUNIT: Balance = 1_000_000;
+pub const UNIT: Balance = 1_000_000_000_000_000_000;
+pub const CENTIUNIT: Balance = UNIT / 100;
+pub const MILLIUNIT: Balance = UNIT / 1_000;
+pub const MICROUNIT: Balance = MILLIUNIT / 1_000;
 
 /// The existential deposit. Set to 1/10 of the Connected Relay Chain.
 pub const EXISTENTIAL_DEPOSIT: Balance = MILLIUNIT;
@@ -405,46 +404,7 @@ parameter_types! {
     pub MessageQueueServiceWeight: Weight = Perbill::from_percent(35) * RuntimeBlockWeights::get().max_block;
 }
 
-impl pallet_message_queue::Config for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type WeightInfo = ();
-    #[cfg(feature = "runtime-benchmarks")]
-    type MessageProcessor = pallet_message_queue::mock_helpers::NoopMessageProcessor<
-        cumulus_primitives_core::AggregateMessageOrigin,
-    >;
-    #[cfg(not(feature = "runtime-benchmarks"))]
-    type MessageProcessor = xcm_builder::ProcessXcmMessage<
-        AggregateMessageOrigin,
-        xcm_executor::XcmExecutor<xcm_config::XcmConfig>,
-        RuntimeCall,
-    >;
-    type Size = u32;
-    // The XCMP queue pallet is only ever able to handle the `Sibling(ParaId)` origin:
-    type QueueChangeHandler = NarrowOriginToSibling<XcmpQueue>;
-    type QueuePausedQuery = NarrowOriginToSibling<XcmpQueue>;
-    type HeapSize = sp_core::ConstU32<{ 64 * 1024 }>;
-    type MaxStale = sp_core::ConstU32<8>;
-    type ServiceWeight = MessageQueueServiceWeight;
-    type IdleMaxServiceWeight = ();
-}
-
 impl cumulus_pallet_aura_ext::Config for Runtime {}
-
-impl cumulus_pallet_xcmp_queue::Config for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type ChannelInfo = ParachainSystem;
-    type VersionWrapper = ();
-    // Enqueue XCMP messages from siblings for later processing.
-    type XcmpQueue = TransformOrigin<MessageQueue, AggregateMessageOrigin, ParaId, ParaIdToSibling>;
-    type MaxInboundSuspended = sp_core::ConstU32<1_000>;
-    type MaxActiveOutboundChannels = ConstU32<128>;
-    type MaxPageSize = ConstU32<{ 1 << 16 }>;
-    type ControllerOrigin = EnsureRoot<AccountId>;
-    type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
-    type WeightInfo = ();
-    type PriceForSiblingDelivery =
-        polkadot_runtime_common::xcm_sender::NoPriceForMessageDelivery<ParaId>;
-}
 
 parameter_types! {
     pub const Period: u32 = 6 * HOURS;
