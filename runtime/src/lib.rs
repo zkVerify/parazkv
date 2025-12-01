@@ -23,23 +23,29 @@ use sp_runtime::{
     transaction_validity::{TransactionSource, TransactionValidity},
     ApplyExtrinsicResult, MultiSignature,
 };
+use static_assertions::const_assert;
+
+pub use types::currency;
 
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 
+use codec::MaxEncodedLen;
 use cumulus_primitives_core::AggregateMessageOrigin;
 use frame_support::{
     construct_runtime, derive_impl,
     dispatch::DispatchClass,
     genesis_builder_helper::{build_state, get_preset},
     parameter_types,
-    traits::{ConstBool, ConstU32, ConstU64, ConstU8},
+    traits::{
+        fungible::HoldConsideration, ConstBool, ConstU32, ConstU64, ConstU8, LinearStoragePrice,
+    },
     weights::{
         constants::WEIGHT_REF_TIME_PER_SECOND, ConstantMultiplier, Weight, WeightToFeeCoefficient,
         WeightToFeeCoefficients, WeightToFeePolynomial,
     },
-    PalletId,
+    Blake2_128Concat, Identity, PalletId, StorageHasher,
 };
 use frame_system::{
     limits::{BlockLength, BlockWeights},
@@ -48,6 +54,8 @@ use frame_system::{
 
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 pub use sp_runtime::{MultiAddress, Perbill, Permill};
+
+pub mod types;
 
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
@@ -186,7 +194,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: Cow::Borrowed("template-parachain"),
     impl_name: Cow::Borrowed("template-parachain"),
     authoring_version: 1,
-    spec_version: 1,
+    spec_version: 3,
     impl_version: 0,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -529,6 +537,62 @@ pub mod pallet_xcm_notifications {
     }
 }
 
+mod vk_registration_parameters {
+    use super::*;
+
+    fn vks_key_size() -> u32 {
+        Identity::max_len::<sp_core::H256>() as u32
+    }
+    fn tickets_key_size() -> u32 {
+        Blake2_128Concat::max_len::<(AccountId, sp_core::H256)>() as u32
+    }
+    fn tickets_value_size() -> u32 {
+        VkRegistrationHoldConsideration::max_encoded_len() as u32
+    }
+    parameter_types! {
+        pub VkRegistrationBaseDeposit: Balance = currency::deposit(2, vks_key_size() + tickets_key_size() + tickets_value_size());
+        pub const VkRegistrationByteDeposit: Balance = currency::deposit(0, 1);
+        pub const VkRegistrationHoldReason: RuntimeHoldReason = RuntimeHoldReason::CommonVerifiers(pallet_verifiers::common::HoldReason::VkRegistration);
+    }
+}
+
+use vk_registration_parameters::*;
+
+type VkRegistrationHoldConsideration = HoldConsideration<
+    AccountId,
+    Balances,
+    VkRegistrationHoldReason,
+    LinearStoragePrice<VkRegistrationBaseDeposit, VkRegistrationByteDeposit, Balance>,
+>;
+
+impl pallet_verifiers::common::Config for Runtime {
+    type CommonWeightInfo = Runtime;
+}
+
+pub const GROTH16_MAX_NUM_INPUTS: u32 = 64;
+parameter_types! {
+    pub const Groth16MaxNumInputs: u32 = GROTH16_MAX_NUM_INPUTS;
+}
+
+impl pallet_groth16_verifier::Config for Runtime {
+    const MAX_NUM_INPUTS: u32 = Groth16MaxNumInputs::get();
+}
+
+// We should be sure that the max number of inputs does not exceed the max number of inputs in the verifier crate.
+const_assert!(
+    <Runtime as pallet_groth16_verifier::Config>::MAX_NUM_INPUTS
+        <= pallet_groth16_verifier::MAX_NUM_INPUTS
+);
+
+impl pallet_verifiers::Config<pallet_groth16_verifier::Groth16<Runtime>> for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type OnProofVerified = ();
+    type Ticket = VkRegistrationHoldConsideration;
+    type WeightInfo = pallet_groth16_verifier::Groth16Weight<()>; // Mock
+    #[cfg(feature = "runtime-benchmarks")]
+    type Currency = Balances;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
     pub struct Runtime {
@@ -558,6 +622,11 @@ construct_runtime!(
         CumulusXcm: cumulus_pallet_xcm = 32,
         MessageQueue: pallet_message_queue = 33,
         XcmNotifications: pallet_xcm_notifications = 34,
+
+        // Verifiers. Start indices at 160 to leave room and to the end (255). Don't add
+        // any kind of other pallets after this value.
+        CommonVerifiers: pallet_verifiers::common = 160,
+        SettlementGroth16Pallet: pallet_groth16_verifier = 161,
     }
 );
 
@@ -573,6 +642,8 @@ mod benches {
         [pallet_collator_selection, CollatorSelection]
         [cumulus_pallet_parachain_system, ParachainSystem]
         // [cumulus_pallet_xcmp_queue, XcmpQueue]
+        // verifiers
+        [pallet_groth16_verifier, Groth16VerifierBench::<Runtime>]
     );
 }
 
@@ -749,6 +820,7 @@ impl_runtime_apis! {
             use frame_support::traits::StorageInfoTrait;
             use frame_system_benchmarking::Pallet as SystemBench;
             use cumulus_pallet_session_benchmarking::Pallet as SessionBench;
+            use pallet_groth16_verifier::benchmarking::Pallet as Groth16VerifierBench;
 
             let mut list = Vec::<BenchmarkList>::new();
             list_benchmarks!(list, extra);
@@ -765,6 +837,8 @@ impl_runtime_apis! {
             use frame_system_benchmarking::Pallet as SystemBench;
 
             use cumulus_pallet_session_benchmarking::Pallet as SessionBench;
+
+            use pallet_groth16_verifier::benchmarking::Pallet as Groth16VerifierBench;
 
             use frame_support::traits::WhitelistedStorageKeys;
             let whitelist = AllPalletsWithSystem::whitelisted_storage_keys();

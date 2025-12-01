@@ -22,7 +22,6 @@ use cumulus_primitives_core::{relay_chain::CollatorPair, ParaId};
 use cumulus_relay_chain_interface::{OverseerHandle, RelayChainInterface};
 
 // Substrate Imports
-use cumulus_client_service::ParachainHostFunctions;
 use frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE;
 use polkadot_primitives::ValidationCode;
 use prometheus_endpoint::Registry;
@@ -34,6 +33,12 @@ use sc_service::{Configuration, PartialComponents, TFullBackend, TFullClient, Ta
 use sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker, TelemetryWorkerHandle};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use sp_keystore::KeystorePtr;
+
+pub type ParachainHostFunctions = (
+    cumulus_primitives_proof_size_hostfunction::storage_proof_size::HostFunctions,
+    sp_io::SubstrateHostFunctions,
+    native::HLNativeHostFunctions,
+);
 
 type ParachainExecutor = WasmExecutor<ParachainHostFunctions>;
 

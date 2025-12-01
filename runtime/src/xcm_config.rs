@@ -179,8 +179,6 @@ impl Contains<Location> for ParentRelayChain {
 }
 
 // TODO: Change barrier to charge
-// pub type Barrier = AllowUnpaidExecutionFrom<Everything>;
-
 pub type Barrier = TrailingSetTopicAsId<
     DenyThenTry<
         DenyReserveTransferToRelayChain,
