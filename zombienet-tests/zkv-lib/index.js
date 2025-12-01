@@ -1,3 +1,19 @@
+zkvTypes = {
+    Curve: {
+        _enum: ["Bn254", "Bls12_381"]
+    },
+    Groth16Vk: {
+        curve: "Curve",
+        alphaG1: "Bytes",
+        betaG2: "Bytes",
+        gammaG2: "Bytes",
+        deltaG2: "Bytes",
+        gammaAbcG1: "Vec<Bytes>"
+    },
+};
+
+zkvRpc = {};
+
 BlockUntil = {
     InBlock: 'InBlock',
 
@@ -10,6 +26,38 @@ let api = null;
 
 const BLOCK_TIME = 6000;  // block time in milliseconds
 exports.BLOCK_TIME = BLOCK_TIME;
+
+exports.init_api = async (zombie, nodeName, networkInfo) => {
+    if (api === null) {
+        const { wsUri } = networkInfo.nodesByName[nodeName];
+        const provider = new zombie.WsProvider(wsUri);
+        api = new zombie.ApiPromise({ provider, types: zkvTypes, rpc: zkvRpc });
+        await api.isReady;
+    }
+    return api;
+}
+
+exports.submitProof = async (pallet, signer, ...verifierArgs) => {
+    const validProofSubmission = (verifierArgs.length < 4) ? pallet.submitProof(...verifierArgs, null) : pallet.submitProof(...verifierArgs);
+    return await submitExtrinsic(api, validProofSubmission, signer, BlockUntil.InBlock, (event) =>
+        (event.method == "ProofVerified") ||
+        (event.section == "aggregate" && event.method == "NewProof") ||
+        (event.section == "aggregate" && event.method == "AggregationComplete")
+    );
+}
+
+exports.getBalance = async (user) => {
+    return await getBalance(user);
+}
+
+async function getBalance(user) {
+    return (await api.query.system.account(user.address))["data"]["free"]
+}
+
+exports.receivedEvents = (data) => {
+    let events = Array.isArray(data) ? data : data.events;
+    return Array.isArray(events) && events.length > 0;
+}
 
 async function _handleTransactionLifecycle(api, sendFunction, blockUntil, filter) {
     let transactionSuccessEvent = false;
