@@ -80,6 +80,10 @@ cumulus-primitives-aura = { workspace = true }
 pallet-verifiers = { workspace = true }
 pallet-groth16-verifier = { workspace = true }
 static_assertions = "1.1.0"
+pallet-aggregate = { workspace = true }
+hp-dispatch = { workspace = true }
+# pallet-hyperbridge-aggregations = { workspace = true }
+# ismp = { workspace = true }
 
 [features]
 default = [ "std" ]
@@ -100,6 +104,7 @@ std = [
 	"frame-system-rpc-runtime-api/std",
 	"frame-system/std",
 	"frame-try-runtime?/std",
+	"hp-dispatch/std",
 	"log/std",
 	"pallet-aura/std",
 	"pallet-authorship/std",
@@ -114,6 +119,7 @@ std = [
 	"pallet-xcm/std",
 	"pallet-verifiers/std",
 	"pallet-groth16-verifier/std",
+	"pallet-aggregate/std",
 	"parachain-info/std",
 	"parachains-common/std",
 	"polkadot-parachain-primitives/std",
@@ -146,7 +152,7 @@ runtime-benchmarks = [
 	"frame-support/runtime-benchmarks",
 	"frame-system-benchmarking/runtime-benchmarks",
 	"frame-system/runtime-benchmarks",
-	#"hex-literal",
+	"hp-dispatch/try-runtime",
 	"pallet-balances/runtime-benchmarks",
 	"pallet-collator-selection/runtime-benchmarks",
 	"pallet-message-queue/runtime-benchmarks",
@@ -156,6 +162,7 @@ runtime-benchmarks = [
 	"pallet-xcm/runtime-benchmarks",
 	"pallet-verifiers/runtime-benchmarks",
 	"pallet-groth16-verifier/runtime-benchmarks",
+	"pallet-aggregate/runtime-benchmarks",
 	"parachains-common/runtime-benchmarks",
 	"polkadot-parachain-primitives/runtime-benchmarks",
 	"polkadot-runtime-common/runtime-benchmarks",
@@ -184,6 +191,7 @@ try-runtime = [
 	"pallet-transaction-payment/try-runtime",
 	"pallet-xcm/try-runtime",
 	"pallet-verifiers/try-runtime",
+	"pallet-aggregate/try-runtime",
 	"parachain-info/try-runtime",
 	"polkadot-runtime-common/try-runtime",
 	"sp-runtime/try-runtime",

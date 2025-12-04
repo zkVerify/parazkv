@@ -13,10 +13,11 @@ extern crate alloc;
 use alloc::borrow::Cow;
 use alloc::{vec, vec::Vec};
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
+use currency::CENTS;
 use pallet_aura::Authorities;
 use smallvec::smallvec;
 use sp_api::impl_runtime_apis;
-use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
+use sp_core::{crypto::KeyTypeId, Get, OpaqueMetadata, H256};
 use sp_runtime::{
     generic, impl_opaque_keys,
     traits::{BlakeTwo256, Block as BlockT, IdentifyAccount, Verify},
@@ -35,7 +36,7 @@ use codec::MaxEncodedLen;
 use cumulus_primitives_core::AggregateMessageOrigin;
 use frame_support::{
     construct_runtime, derive_impl,
-    dispatch::DispatchClass,
+    dispatch::{DispatchClass, DispatchResult},
     genesis_builder_helper::{build_state, get_preset},
     parameter_types,
     traits::{
@@ -51,6 +52,7 @@ use frame_system::{
     limits::{BlockLength, BlockWeights},
     EnsureRoot,
 };
+use hp_dispatch::{Destination, DispatchAggregation};
 
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 pub use sp_runtime::{MultiAddress, Perbill, Permill};
@@ -556,6 +558,89 @@ mod vk_registration_parameters {
     }
 }
 
+/// Linear increment.
+pub struct Linear<Base, Slope, Balance>(core::marker::PhantomData<(Base, Slope, Balance)>);
+impl<Base, Slope> pallet_aggregate::ComputePublisherTip<Balance> for Linear<Base, Slope, Balance>
+where
+    Base: Get<Balance>,
+    Slope: Get<Permill>,
+{
+    fn compute_tip(estimated: Balance) -> Option<Balance> {
+        Base::get()
+            .saturating_add(Slope::get().mul_floor(estimated))
+            .into()
+    }
+}
+
+impl DispatchAggregation<Balance, AccountId> for Runtime {
+    fn dispatch_aggregation(
+        _domain_id: u32,
+        _aggregation_id: u64,
+        _aggregation: H256,
+        destination_params: Destination,
+        _fee: Balance,
+        _delivery_owner: AccountId,
+    ) -> DispatchResult {
+        match destination_params {
+            Destination::None => Ok(()),
+            Destination::Hyperbridge(_params) => Err(sp_runtime::DispatchError::Other(
+                "Hyperbridge is not implemented yet",
+            )),
+        }
+    }
+
+    fn max_weight() -> Weight {
+        Default::default()
+    }
+
+    fn dispatch_weight(_destination: &Destination) -> Weight {
+        Default::default()
+    }
+}
+
+parameter_types! {
+    pub const AggregateBaseDeposit: Balance = currency::deposit(2, 64);
+    pub const AggregateByteDeposit: Balance = currency::deposit(0, 1);
+    pub const AggregateRegisterHoldReason: RuntimeHoldReason = RuntimeHoldReason::Aggregate(pallet_aggregate::HoldReason::Domain);
+    pub const AggregateBaseTip: Balance = 10 * CENTS;
+    pub const AggregateLinearTip: Permill = Permill::from_percent(10);
+    pub const AggregateMaxSize: pallet_aggregate::AggregationSize = 128;
+    pub const AggregateQueueSize: u32 = 16;
+}
+
+impl pallet_aggregate::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type RuntimeHoldReason = RuntimeHoldReason;
+    type AggregationSize = AggregateMaxSize;
+    type MaxPendingPublishQueueSize = AggregateQueueSize;
+    type ManagerOrigin = EnsureRoot<AccountId>;
+    type Hold = Balances;
+
+    type Consideration = frame_support::traits::fungible::HoldConsideration<
+        AccountId,
+        Balances,
+        AggregateRegisterHoldReason,
+        frame_support::traits::LinearStoragePrice<
+            AggregateBaseDeposit,
+            AggregateByteDeposit,
+            Balance,
+        >,
+    >;
+    type EstimateCallFee = TransactionPayment;
+
+    type ComputePublisherTip = Linear<AggregateBaseTip, AggregateLinearTip, Balance>;
+
+    type WeightInfo = (); // weights::pallet_aggregate::ZKVWeight<Runtime>;
+
+    #[cfg(feature = "runtime-benchmarks")]
+    const AGGREGATION_SIZE: u32 = AggregateMaxSize::get() as u32;
+
+    #[cfg(feature = "runtime-benchmarks")]
+    type Currency = Balances;
+
+    type DispatchAggregation = Self;
+}
+
 use vk_registration_parameters::*;
 
 type VkRegistrationHoldConsideration = HoldConsideration<
@@ -586,7 +671,7 @@ const_assert!(
 
 impl pallet_verifiers::Config<pallet_groth16_verifier::Groth16<Runtime>> for Runtime {
     type RuntimeEvent = RuntimeEvent;
-    type OnProofVerified = ();
+    type OnProofVerified = Aggregate;
     type Ticket = VkRegistrationHoldConsideration;
     type WeightInfo = pallet_groth16_verifier::Groth16Weight<()>; // Mock
     #[cfg(feature = "runtime-benchmarks")]
@@ -623,6 +708,9 @@ construct_runtime!(
         MessageQueue: pallet_message_queue = 33,
         XcmNotifications: pallet_xcm_notifications = 34,
 
+        // Our stuff
+        Aggregate: pallet_aggregate = 81,
+
         // Verifiers. Start indices at 160 to leave room and to the end (255). Don't add
         // any kind of other pallets after this value.
         CommonVerifiers: pallet_verifiers::common = 160,
@@ -642,6 +730,7 @@ mod benches {
         [pallet_collator_selection, CollatorSelection]
         [cumulus_pallet_parachain_system, ParachainSystem]
         // [cumulus_pallet_xcmp_queue, XcmpQueue]
+        // our pallets
         // verifiers
         [pallet_groth16_verifier, Groth16VerifierBench::<Runtime>]
     );

@@ -123,6 +123,10 @@ cumulus-primitives-proof-size-hostfunction = { version = "0.11.0", default-featu
 native = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
 pallet-verifiers = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
 pallet-groth16-verifier = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
+pallet-aggregate = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
+# pallet-hyperbridge-aggregations = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
+hp-dispatch = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
+# ismp = { default-features = false, version = "1.0.0" }
 
 [patch.crates-io]
 cumulus-relay-chain-inprocess-interface = {git = "https://github.com/zkVerify/zkVerify.git", ref = "2bfeeed987d6eda99734f3a65546275b3bb65d36"}
