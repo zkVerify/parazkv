@@ -82,8 +82,6 @@ pallet-groth16-verifier = { workspace = true }
 static_assertions = "1.1.0"
 pallet-aggregate = { workspace = true }
 hp-dispatch = { workspace = true }
-# pallet-hyperbridge-aggregations = { workspace = true }
-# ismp = { workspace = true }
 
 [features]
 default = [ "std" ]

@@ -1,5 +1,5 @@
 [package]
-name = "paratest-node"
+name = "parazkv-node"
 version = "0.1.0"
 authors.workspace = true
 description = "A new Cumulus FRAME-based Substrate Node, ready for hacking together a parachain."
@@ -67,9 +67,7 @@ cumulus-primitives-core = { workspace = true, default-features = true }
 cumulus-primitives-parachain-inherent = { workspace = true }
 cumulus-relay-chain-interface = { workspace = true }
 
-# xcm = { package = "staging-xcm", version = "6.0.0" }
 color-print = "0.3.4"
-# sp-consensus-aura = { version = "0.31.0" }
 
 [build-dependencies]
 substrate-build-script-utils = { workspace = true }

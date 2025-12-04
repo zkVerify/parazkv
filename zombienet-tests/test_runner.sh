@@ -96,9 +96,9 @@ fi
 echo -e "${TXT_BIGRN}INFO: ${TXT_BIBLK}Running tests with a ${PROFILE} build${TXT_NORML}"
 
 HAS_BINARIES="true"
-if [[ ! ( -f "../${BIN_DIR}/zkv-relay" && -f "../target/${PROFILE}/paratest-node" ) ]]; then
-    echo -e "${TXT_BIRED}ERROR: ${TXT_BIBLK}zkv-relay and/or paratest-node binary not found. Compile paratest-node in ${PROFILE} mode and re-launch this script${TXT_NORML}"
-    echo -e "       ${TXT_BIBLK}cargo build -p paratest-node --${PROFILE} --features fast-runtime${TXT_NORML}"
+if [[ ! ( -f "../${BIN_DIR}/zkv-relay" && -f "../target/${PROFILE}/parazkv-node" ) ]]; then
+    echo -e "${TXT_BIRED}ERROR: ${TXT_BIBLK}zkv-relay and/or parazkv-node binary not found. Compile parazkv-node in ${PROFILE} mode and re-launch this script${TXT_NORML}"
+    echo -e "       ${TXT_BIBLK}cargo build -p parazkv-node --${PROFILE} --features fast-runtime${TXT_NORML}"
     HAS_BINARIES="false"
 fi
 

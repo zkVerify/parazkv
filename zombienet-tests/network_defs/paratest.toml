@@ -19,10 +19,10 @@ cumulus_based = true
 
 [[parachains.collators]]
 name = "collator-alice"
-command = "paratest-node"
+command = "parazkv-node"
 args = []
 
 [[parachains.collators]]
 name = "collator-bob"
-command = "paratest-node"
+command = "parazkv-node"
 args = []

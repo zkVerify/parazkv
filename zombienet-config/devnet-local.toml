@@ -32,7 +32,7 @@ chain = "local"
 
 [[parachains.collators]]
 name = "vparachain-test-parachain-collator01"
-command = "./target/release/paratest-node"
+command = "./target/release/parazkv-node"
 ws_port = 9933
 rpc_port = 8833
 #args = ["--rpc-max-connections 10000 -ltrace"]
@@ -42,5 +42,5 @@ args = ["-lxcm=trace", "--rpc-max-connections 10000"]
 name = "vparachain-test-parachain-collator02"
 ws_port = 9922
 rpc_port = 8822
-command = "./target/release/paratest-node"
+command = "./target/release/parazkv-node"
 args = ["--rpc-max-connections 10000"]
