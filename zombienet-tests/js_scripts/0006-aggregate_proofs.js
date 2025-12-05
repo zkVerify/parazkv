@@ -48,51 +48,51 @@ async function run(nodeName, networkInfo, _args) {
             pallet: api.tx.settlementFFlonkPallet,
             args: [{ 'Vk': FFLONK_VK }, FFLONK_PROOF, FFLONK_PUBS],
         },
-        {
-            name: "Risc0.V.2.2",
-            pallet: api.tx.settlementRisc0Pallet,
-            args: [{ 'Vk': RISC0_V2_2_VK }, RISC0_V2_2_PROOF, RISC0_V2_2_PUBS],
-        },
-        {
-            name: "Risc0.V.3.0",
-            pallet: api.tx.settlementRisc0Pallet,
-            args: [{ 'Vk': RISC0_V3_0_VK }, RISC0_V3_0_PROOF, RISC0_V3_0_PUBS],
-        },
+        // {
+        //     name: "Risc0.V.2.2",
+        //     pallet: api.tx.settlementRisc0Pallet,
+        //     args: [{ 'Vk': RISC0_V2_2_VK }, RISC0_V2_2_PROOF, RISC0_V2_2_PUBS],
+        // },
+        // {
+        //     name: "Risc0.V.3.0",
+        //     pallet: api.tx.settlementRisc0Pallet,
+        //     args: [{ 'Vk': RISC0_V3_0_VK }, RISC0_V3_0_PROOF, RISC0_V3_0_PUBS],
+        // },
         {
             name: "Groth16",
             pallet: api.tx.settlementGroth16Pallet,
             args: [{ 'Vk': GROTH16_VK }, GROTH16_PROOF, GROTH16_PUBS],
         },
-        {
-            name: "Ultrahonk (ZK)",
-            pallet: api.tx.settlementUltrahonkPallet,
-            args: [{ 'Vk': ULTRAHONK_VK }, ULTRAHONK_ZK_PROOF, ULTRAHONK_PUBS],
-        },
-        {
-            name: "Ultrahonk (Plain)",
-            pallet: api.tx.settlementUltrahonkPallet,
-            args: [{ 'Vk': ULTRAHONK_VK }, ULTRAHONK_PLAIN_PROOF, ULTRAHONK_PUBS],
-        },
-        {
-            name: "Ultraplonk",
-            pallet: api.tx.settlementUltraplonkPallet,
-            args: [{ 'Vk': ULTRAPLONK_VK }, ULTRAPLONK_PROOF, ULTRAPLONK_PUBS],
-        },
-        {
-            name: "Plonky2",
-            pallet: api.tx.settlementPlonky2Pallet,
-            args: [{ 'Vk': PLONKY2_VK }, PLONKY2_PROOF, PLONKY2_PUBS],
-        },
-        {
-            name: "Sp1",
-            pallet: api.tx.settlementSp1Pallet,
-            args: [{ 'Vk': SP1_VK }, SP1_PROOF, SP1_PUBS],
-        },
-        {
-            name: "Ezkl",
-            pallet: api.tx.settlementEzklPallet,
-            args: [{ 'Vk': EZKL_VK }, EZKL_PROOF, EZKL_PUBS],
-        },
+        // {
+        //     name: "Ultrahonk (ZK)",
+        //     pallet: api.tx.settlementUltrahonkPallet,
+        //     args: [{ 'Vk': ULTRAHONK_VK }, ULTRAHONK_ZK_PROOF, ULTRAHONK_PUBS],
+        // },
+        // {
+        //     name: "Ultrahonk (Plain)",
+        //     pallet: api.tx.settlementUltrahonkPallet,
+        //     args: [{ 'Vk': ULTRAHONK_VK }, ULTRAHONK_PLAIN_PROOF, ULTRAHONK_PUBS],
+        // },
+        // {
+        //     name: "Ultraplonk",
+        //     pallet: api.tx.settlementUltraplonkPallet,
+        //     args: [{ 'Vk': ULTRAPLONK_VK }, ULTRAPLONK_PROOF, ULTRAPLONK_PUBS],
+        // },
+        // {
+        //     name: "Plonky2",
+        //     pallet: api.tx.settlementPlonky2Pallet,
+        //     args: [{ 'Vk': PLONKY2_VK }, PLONKY2_PROOF, PLONKY2_PUBS],
+        // },
+        // {
+        //     name: "Sp1",
+        //     pallet: api.tx.settlementSp1Pallet,
+        //     args: [{ 'Vk': SP1_VK }, SP1_PROOF, SP1_PUBS],
+        // },
+        // {
+        //     name: "Ezkl",
+        //     pallet: api.tx.settlementEzklPallet,
+        //     args: [{ 'Vk': EZKL_VK }, EZKL_PROOF, EZKL_PUBS],
+        // },
     ];
 
     // Only manager can register a Hyperbridge delivery domain.

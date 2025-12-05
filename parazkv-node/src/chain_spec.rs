@@ -177,7 +177,7 @@ fn testnet_genesis(
 ) -> serde_json::Value {
     serde_json::json!({
         "balances": {
-            "balances": endowed_accounts.iter().cloned().map(|k| (k, 1u64 << 60)).collect::<Vec<_>>(),
+            "balances": endowed_accounts.iter().cloned().map(|k| (k, 2_000_000_000_000_000_000_000_u128)).collect::<Vec<_>>(),
         },
         "parachainInfo": {
             "parachainId": id,
