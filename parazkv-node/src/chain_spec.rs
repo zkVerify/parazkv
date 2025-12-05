@@ -1,5 +1,5 @@
 use cumulus_primitives_core::ParaId;
-use paratest_runtime::{AccountId, AuraId, Signature, EXISTENTIAL_DEPOSIT};
+use parazkv_runtime::{AccountId, AuraId, Signature, EXISTENTIAL_DEPOSIT};
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
@@ -56,8 +56,8 @@ where
 /// Generate the session keys from individual elements.
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we have just one key).
-pub fn template_session_keys(keys: AuraId) -> paratest_runtime::SessionKeys {
-    paratest_runtime::SessionKeys { aura: keys }
+pub fn template_session_keys(keys: AuraId) -> parazkv_runtime::SessionKeys {
+    parazkv_runtime::SessionKeys { aura: keys }
 }
 
 const PARA_ID: u32 = 1_599;
@@ -72,7 +72,7 @@ pub fn development_config(relay: &str) -> ChainSpec {
     properties.insert("ss58Format".into(), 42.into());
 
     ChainSpec::builder(
-        paratest_runtime::WASM_BINARY.expect("WASM binary was not built, please build it!"),
+        parazkv_runtime::WASM_BINARY.expect("WASM binary was not built, please build it!"),
         Extensions {
             relay_chain: relay.into(),
             // You MUST set this to the correct network!
@@ -125,7 +125,7 @@ pub fn local_testnet_config(relay: &str) -> ChainSpec {
 
     #[allow(deprecated)]
     ChainSpec::builder(
-        paratest_runtime::WASM_BINARY.expect("WASM binary was not built, please build it!"),
+        parazkv_runtime::WASM_BINARY.expect("WASM binary was not built, please build it!"),
         Extensions {
             relay_chain: relay.into(),
             // You MUST set this to the correct network!

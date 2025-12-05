@@ -1,4 +1,13 @@
+// Custom types and RPC calls
+// This one defines the metadata for the return value of proofPath RPC call
 zkvTypes = {
+    MerkleProof: {
+        root: 'H256',
+        proof: 'Vec<H256>',
+        number_of_leaves: 'u32',
+        leaf_index: 'u32',
+        leaf: 'H256',
+    },
     Curve: {
         _enum: ["Bn254", "Bls12_381"]
     },
@@ -10,9 +19,57 @@ zkvTypes = {
         deltaG2: "Bytes",
         gammaAbcG1: "Vec<Bytes>"
     },
+    Plonky2Config: {
+        _enum: ["Keccak", "Poseidon"]
+    },
+    Plonky2Vk: {
+        config: "Plonky2Config",
+        bytes: "Bytes"
+    },
+    EzklVK: {
+        vkBytes: "Bytes"
+    },
+    FflonkVk: {
+        power: "u8",
+        k1: "U256",
+        k2: "U256",
+        w: "U256",
+        w3: "U256",
+        w4: "U256",
+        w8: "U256",
+        wr: "U256",
+        x2: "[[U256; 2]; 3]",
+        c0: "[U256; 3]",
+    },
 };
 
-zkvRpc = {};
+// This one defines the metadata for the arguments and return value of proofPath RPC call
+zkvRpc = {
+    aggregate: {
+        statementPath: {
+            description: 'Get the Merkle root and path of a aggregate statement',
+            params: [
+                {
+                    name: 'at',
+                    type: 'BlockHash',
+                },
+                {
+                    name: 'domain_id',
+                    type: 'u32'
+                },
+                {
+                    name: 'aggregation_id',
+                    type: 'u64'
+                },
+                {
+                    name: 'statement',
+                    type: 'H256'
+                }
+            ],
+            type: 'MerkleProof'
+        }
+    }
+};
 
 BlockUntil = {
     InBlock: 'InBlock',
@@ -44,6 +101,31 @@ exports.submitProof = async (pallet, signer, ...verifierArgs) => {
         (event.section == "aggregate" && event.method == "NewProof") ||
         (event.section == "aggregate" && event.method == "AggregationComplete")
     );
+}
+
+exports.registerDomain = async (signer, aggregation_size, queue_len, rules, destination, deliveryOwner) => {
+    let extrinsic = api.tx.aggregate.registerDomain(aggregation_size, queue_len, rules, destination, deliveryOwner);
+    return await submitExtrinsic(api, extrinsic, signer, BlockUntil.InBlock, (event) => event.section == "aggregate" && event.method == "NewDomain");
+}
+
+exports.sudoRegisterDomain = async (signer, aggregation_size, queue_len, rules, destination, deliveryOwner) => {
+    let extrinsic = api.tx.sudo.sudo(api.tx.aggregate.registerDomain(aggregation_size, queue_len, rules, destination, deliveryOwner));
+    return await submitExtrinsic(api, extrinsic, signer, BlockUntil.InBlock, (event) => event.section == "aggregate" && event.method == "NewDomain");
+}
+
+exports.unregisterDomain = async (signer, domain_id) => {
+    let extrinsic = api.tx.aggregate.unregisterDomain(domain_id);
+    return await submitExtrinsic(api, extrinsic, signer, BlockUntil.InBlock);
+}
+
+exports.holdDomain = async (signer, domain_id) => {
+    let extrinsic = api.tx.aggregate.holdDomain(domain_id);
+    return await submitExtrinsic(api, extrinsic, signer, BlockUntil.InBlock);
+}
+
+exports.aggregate = async (signer, domain_id, aggregation_id) => {
+    let extrinsic = api.tx.aggregate.aggregate(domain_id, aggregation_id);
+    return await submitExtrinsic(api, extrinsic, signer, BlockUntil.InBlock, (event) => event.section == "aggregate");
 }
 
 exports.getBalance = async (user) => {

@@ -1,5 +1,5 @@
 [package]
-name = "paratest-runtime"
+name = "parazkv-runtime"
 version = "0.6.0"
 authors.workspace = true
 description = "A new Cumulus FRAME-based Substrate Runtime, ready for hacking together a parachain."
@@ -79,6 +79,13 @@ cumulus-primitives-aura = { workspace = true }
 # Verifiers
 pallet-verifiers = { workspace = true }
 pallet-groth16-verifier = { workspace = true }
+pallet-ezkl-verifier = { workspace = true }
+pallet-fflonk-verifier = { workspace = true }
+pallet-risc0-verifier = { workspace = true }
+pallet-ultrahonk-verifier = { workspace = true }
+pallet-ultraplonk-verifier = { workspace = true }
+pallet-sp1-verifier = { workspace = true }
+pallet-plonky2-verifier = { workspace = true }
 static_assertions = "1.1.0"
 pallet-aggregate = { workspace = true }
 hp-dispatch = { workspace = true }
@@ -117,6 +124,13 @@ std = [
 	"pallet-xcm/std",
 	"pallet-verifiers/std",
 	"pallet-groth16-verifier/std",
+	"pallet-ezkl-verifier/std",
+	"pallet-risc0-verifier/std",
+	"pallet-fflonk-verifier/std",
+	"pallet-ultrahonk-verifier/std",
+	"pallet-ultraplonk-verifier/std",
+	"pallet-sp1-verifier/std",
+	"pallet-plonky2-verifier/std",
 	"pallet-aggregate/std",
 	"parachain-info/std",
 	"parachains-common/std",
@@ -160,6 +174,13 @@ runtime-benchmarks = [
 	"pallet-xcm/runtime-benchmarks",
 	"pallet-verifiers/runtime-benchmarks",
 	"pallet-groth16-verifier/runtime-benchmarks",
+	"pallet-ezkl-verifier/runtime-benchmarks",
+	"pallet-fflonk-verifier/runtime-benchmarks",
+	"pallet-risc0-verifier/runtime-benchmarks",
+	"pallet-sp1-verifier/runtime-benchmarks",
+	"pallet-ultrahonk-verifier/runtime-benchmarks",
+	"pallet-ultraplonk-verifier/runtime-benchmarks",
+	"pallet-plonky2-verifier/runtime-benchmarks",
 	"pallet-aggregate/runtime-benchmarks",
 	"parachains-common/runtime-benchmarks",
 	"polkadot-parachain-primitives/runtime-benchmarks",

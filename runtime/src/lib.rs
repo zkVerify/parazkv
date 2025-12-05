@@ -654,6 +654,34 @@ impl pallet_verifiers::common::Config for Runtime {
     type CommonWeightInfo = Runtime;
 }
 
+parameter_types! {
+    pub const EzklMaxPubs: u32 = 32;
+}
+
+impl pallet_ezkl_verifier::Config for Runtime {
+    type MaxPubs = EzklMaxPubs;
+}
+
+pub type EzklVerifier = pallet_ezkl_verifier::Ezkl<Runtime>;
+
+impl pallet_verifiers::Config<EzklVerifier> for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type OnProofVerified = Aggregate;
+    type WeightInfo = pallet_ezkl_verifier::EzklWeight<()>;
+    type Ticket = VkRegistrationHoldConsideration;
+    #[cfg(feature = "runtime-benchmarks")]
+    type Currency = Balances;
+}
+
+impl pallet_verifiers::Config<pallet_fflonk_verifier::Fflonk> for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type OnProofVerified = Aggregate;
+    type Ticket = VkRegistrationHoldConsideration;
+    type WeightInfo = pallet_fflonk_verifier::FflonkWeight<()>;
+    #[cfg(feature = "runtime-benchmarks")]
+    type Currency = Balances;
+}
+
 pub const GROTH16_MAX_NUM_INPUTS: u32 = 64;
 parameter_types! {
     pub const Groth16MaxNumInputs: u32 = GROTH16_MAX_NUM_INPUTS;
@@ -674,6 +702,108 @@ impl pallet_verifiers::Config<pallet_groth16_verifier::Groth16<Runtime>> for Run
     type OnProofVerified = Aggregate;
     type Ticket = VkRegistrationHoldConsideration;
     type WeightInfo = pallet_groth16_verifier::Groth16Weight<()>; // Mock
+    #[cfg(feature = "runtime-benchmarks")]
+    type Currency = Balances;
+}
+
+parameter_types! {
+    pub const Plonky2MaxPubsSize: u32 = 512; // eq of 64 public inputs
+    pub const Plonky2MaxProofSize: u32 = 262_144;
+    pub const Plonky2MaxVkSize: u32 = 50_000;
+}
+
+impl pallet_plonky2_verifier::Config for Runtime {
+    type MaxProofSize = Plonky2MaxProofSize;
+    type MaxPubsSize = Plonky2MaxPubsSize;
+    type MaxVkSize = Plonky2MaxVkSize;
+    type WeightInfo = ();
+}
+
+impl pallet_verifiers::Config<pallet_plonky2_verifier::Plonky2<Runtime>> for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type OnProofVerified = Aggregate;
+    type Ticket = VkRegistrationHoldConsideration;
+    type WeightInfo = pallet_plonky2_verifier::Plonky2Weight<()>;
+    #[cfg(feature = "runtime-benchmarks")]
+    type Currency = Balances;
+}
+
+pub const SP1_MAX_PUBS_SIZE: u32 = 32 * 64;
+parameter_types! {
+    pub const Sp1MaxPubsSize: u32 = SP1_MAX_PUBS_SIZE;
+}
+
+impl pallet_sp1_verifier::Config for Runtime {
+    type MaxPubsSize = Sp1MaxPubsSize;
+}
+
+impl pallet_verifiers::Config<pallet_sp1_verifier::Sp1<Runtime>> for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type OnProofVerified = Aggregate;
+    type Ticket = VkRegistrationHoldConsideration;
+    type WeightInfo = pallet_sp1_verifier::Sp1Weight<()>;
+    #[cfg(feature = "runtime-benchmarks")]
+    type Currency = Balances;
+}
+
+parameter_types! {
+    pub const Risc0MaxNSegment: u32 = 4;             // 4 segment of 2^20
+    pub const Risc0Segment20MaxSize: u32 = 350_000; // risc0 2^20 segment size (a standard 2^22)
+                                                    // proof is ~1_400_000
+    pub const Risc0MaxPubsSize: u32 = 4 + 32 * 64;  // 4: bytes for payload length,
+                                                    // 32 * 64: sufficient multiple of 32 bytes
+}
+
+impl pallet_risc0_verifier::Config for Runtime {
+    type MaxNSegment = Risc0MaxNSegment;
+    type Segment20MaxSize = Risc0Segment20MaxSize;
+    type MaxPubsSize = Risc0MaxPubsSize;
+    type WeightInfo = ();
+}
+
+impl pallet_verifiers::Config<pallet_risc0_verifier::Risc0<Runtime>> for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type OnProofVerified = Aggregate;
+    type Ticket = VkRegistrationHoldConsideration;
+    type WeightInfo = pallet_risc0_verifier::Risc0Weight<()>;
+    #[cfg(feature = "runtime-benchmarks")]
+    type Currency = Balances;
+}
+
+parameter_types! {
+    pub const UltrahonkMaxPubs: u32 = 32;
+}
+
+impl pallet_ultrahonk_verifier::Config for Runtime {
+    type MaxPubs = UltrahonkMaxPubs;
+}
+
+pub type UltrahonkVerifier = pallet_ultrahonk_verifier::Ultrahonk<Runtime>;
+
+impl pallet_verifiers::Config<UltrahonkVerifier> for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type OnProofVerified = Aggregate;
+    type Ticket = VkRegistrationHoldConsideration;
+    type WeightInfo = pallet_ultrahonk_verifier::UltrahonkWeight<()>;
+    #[cfg(feature = "runtime-benchmarks")]
+    type Currency = Balances;
+}
+
+parameter_types! {
+    pub const UltraplonkMaxPubs: u32 = 32;
+}
+
+impl pallet_ultraplonk_verifier::Config for Runtime {
+    type MaxPubs = UltraplonkMaxPubs;
+}
+
+pub type UltraplonkVerifier = pallet_ultraplonk_verifier::Ultraplonk<Runtime>;
+
+impl pallet_verifiers::Config<UltraplonkVerifier> for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type OnProofVerified = Aggregate;
+    type Ticket = VkRegistrationHoldConsideration;
+    type WeightInfo = pallet_ultraplonk_verifier::UltraplonkWeight<()>;
     #[cfg(feature = "runtime-benchmarks")]
     type Currency = Balances;
 }
@@ -715,6 +845,13 @@ construct_runtime!(
         // any kind of other pallets after this value.
         CommonVerifiers: pallet_verifiers::common = 160,
         SettlementGroth16Pallet: pallet_groth16_verifier = 161,
+        SettlementRisc0Pallet: pallet_risc0_verifier = 162,
+        SettlementUltraplonkPallet: pallet_ultraplonk_verifier = 163,
+        SettlementPlonky2Pallet: pallet_plonky2_verifier = 165,
+        SettlementFFlonkPallet: pallet_fflonk_verifier = 166,
+        SettlementSp1Pallet: pallet_sp1_verifier = 167,
+        SettlementUltrahonkPallet: pallet_ultrahonk_verifier = 168,
+        SettlementEzklPallet: pallet_ezkl_verifier = 169,
     }
 );
 
@@ -733,6 +870,16 @@ mod benches {
         // our pallets
         // verifiers
         [pallet_groth16_verifier, Groth16VerifierBench::<Runtime>]
+        [pallet_ezkl_verifier, EzklVerifierBench::<Runtime>]
+        [pallet_fflonk_verifier, FflonkVerifierBench::<Runtime>]
+        [pallet_risc0_verifier, Risc0VerifierBench::<Runtime>]
+        [pallet_risc0_verifier_verify_proof, Risc0VerifierVerifyProofBench::<Runtime>]
+        [pallet_risc0_verifier_extend, Risc0VerifierExtendBench::<Runtime>]
+        [pallet_ultrahonk_verifier, UltrahonkVerifierBench::<Runtime>]
+        [pallet_ultraplonk_verifier, UltraplonkVerifierBench::<Runtime>]
+        [pallet_plonky2_verifier, Plonky2VerifierBench::<Runtime>]
+        [pallet_plonky2_verifier_verify_proof, Plonky2VerifierVerifyProofBench::<Runtime>]
+        [pallet_sp1_verifier, Sp1VerifierBench::<Runtime>]
     );
 }
 
@@ -910,6 +1057,16 @@ impl_runtime_apis! {
             use frame_system_benchmarking::Pallet as SystemBench;
             use cumulus_pallet_session_benchmarking::Pallet as SessionBench;
             use pallet_groth16_verifier::benchmarking::Pallet as Groth16VerifierBench;
+            use pallet_fflonk_verifier::benchmarking::Pallet as FflonkVerifierBench;
+            use pallet_risc0_verifier::benchmarking::Pallet as Risc0VerifierBench;
+            use pallet_risc0_verifier::benchmarking_verify_proof::Pallet as Risc0VerifierVerifyProofBench;
+            use pallet_risc0_verifier::extend_benchmarking::Pallet as Risc0VerifierExtendBench;
+            use pallet_ultrahonk_verifier::benchmarking::Pallet as UltrahonkVerifierBench;
+            use pallet_ultraplonk_verifier::benchmarking::Pallet as UltraplonkVerifierBench;
+            use pallet_plonky2_verifier::benchmarking_verify_proof::Pallet as Plonky2VerifierVerifyProofBench;
+            use pallet_plonky2_verifier::benchmarking::Pallet as Plonky2VerifierBench;
+            use pallet_sp1_verifier::benchmarking::Pallet as Sp1VerifierBench;
+            use pallet_ezkl_verifier::benchmarking::Pallet as EzklVerifierBench;
 
             let mut list = Vec::<BenchmarkList>::new();
             list_benchmarks!(list, extra);
@@ -928,6 +1085,16 @@ impl_runtime_apis! {
             use cumulus_pallet_session_benchmarking::Pallet as SessionBench;
 
             use pallet_groth16_verifier::benchmarking::Pallet as Groth16VerifierBench;
+            use pallet_ezkl_verifier::benchmarking::Pallet as EzklVerifierBench;
+            use pallet_fflonk_verifier::benchmarking::Pallet as FflonkVerifierBench;
+            use pallet_risc0_verifier::benchmarking::Pallet as Risc0VerifierBench;
+            use pallet_risc0_verifier::benchmarking_verify_proof::Pallet as Risc0VerifierVerifyProofBench;
+            use pallet_risc0_verifier::extend_benchmarking::Pallet as Risc0VerifierExtendBench;
+            use pallet_ultrahonk_verifier::benchmarking::Pallet as UltrahonkVerifierBench;
+            use pallet_ultraplonk_verifier::benchmarking::Pallet as UltraplonkVerifierBench;
+            use pallet_plonky2_verifier::benchmarking_verify_proof::Pallet as Plonky2VerifierVerifyProofBench;
+            use pallet_plonky2_verifier::benchmarking::Pallet as Plonky2VerifierBench;
+            use pallet_sp1_verifier::benchmarking::Pallet as Sp1VerifierBench;
 
             use frame_support::traits::WhitelistedStorageKeys;
             let whitelist = AllPalletsWithSystem::whitelisted_storage_keys();

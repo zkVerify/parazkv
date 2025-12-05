@@ -5,7 +5,7 @@ use std::{sync::Arc, time::Duration};
 
 use cumulus_client_cli::CollatorOptions;
 // Local Runtime Types
-use paratest_runtime::{
+use parazkv_runtime::{
     opaque::{Block, Hash},
     RuntimeApi,
 };

@@ -7,7 +7,7 @@
 
 use std::sync::Arc;
 
-use paratest_runtime::{opaque::Block, AccountId, Balance, Nonce};
+use parazkv_runtime::{opaque::Block, AccountId, Balance, Nonce};
 
 use sc_transaction_pool_api::TransactionPool;
 use sp_api::ProvideRuntimeApi;

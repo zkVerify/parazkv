@@ -14,7 +14,7 @@ publish = false
 workspace = true
 
 [dependencies]
-paratest-runtime = { path = "../runtime" }
+parazkv-runtime = { path = "../runtime" }
 
 clap = { workspace = true, features = ["derive"] }
 log = { workspace = true }
@@ -78,14 +78,14 @@ runtime-benchmarks = [
 	"cumulus-primitives-core/runtime-benchmarks",
 	"frame-benchmarking-cli/runtime-benchmarks",
 	"frame-benchmarking/runtime-benchmarks",
-	"paratest-runtime/runtime-benchmarks",
+	"parazkv-runtime/runtime-benchmarks",
 	"polkadot-primitives/runtime-benchmarks",
 	"sc-service/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
 	"zkv-cli/runtime-benchmarks",
 ]
 try-runtime = [
-	"paratest-runtime/try-runtime",
+	"parazkv-runtime/try-runtime",
 	"sp-runtime/try-runtime",
 	"zkv-cli/try-runtime",
 ]
