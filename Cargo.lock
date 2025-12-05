@@ -85,40 +85,13 @@ dependencies = [
 [[package]]
 name = "aggregate-rpc"
 version = "0.1.0"
-dependencies = [
- "aggregate-rpc-runtime-api 0.1.0",
- "jsonrpsee 0.24.10",
- "parity-scale-codec",
- "sp-api",
- "sp-blockchain",
- "sp-core",
- "sp-runtime",
-]
-
-[[package]]
-name = "aggregate-rpc"
-version = "0.1.0"
 source = "git+https://github.com/zkVerify/zkVerify.git#2bfeeed987d6eda99734f3a65546275b3bb65d36"
 dependencies = [
- "aggregate-rpc-runtime-api 0.1.0 (git+https://github.com/zkVerify/zkVerify.git)",
+ "aggregate-rpc-runtime-api",
  "jsonrpsee 0.24.10",
  "parity-scale-codec",
  "sp-api",
  "sp-blockchain",
- "sp-core",
- "sp-runtime",
-]
-
-[[package]]
-name = "aggregate-rpc-runtime-api"
-version = "0.1.0"
-dependencies = [
- "binary-merkle-tree",
- "pallet-aggregate",
- "parity-scale-codec",
- "scale-info",
- "serde",
- "sp-api",
  "sp-core",
  "sp-runtime",
 ]
@@ -22134,7 +22107,7 @@ name = "zkv-runtime"
 version = "1.2.1"
 source = "git+https://github.com/zkVerify/zkVerify.git#2bfeeed987d6eda99734f3a65546275b3bb65d36"
 dependencies = [
- "aggregate-rpc-runtime-api 0.1.0 (git+https://github.com/zkVerify/zkVerify.git)",
+ "aggregate-rpc-runtime-api",
  "anyhow",
  "cfg-if",
  "finality-grandpa",
@@ -22236,7 +22209,7 @@ name = "zkv-service"
 version = "11.0.0"
 source = "git+https://github.com/zkVerify/zkVerify.git#2bfeeed987d6eda99734f3a65546275b3bb65d36"
 dependencies = [
- "aggregate-rpc 0.1.0 (git+https://github.com/zkVerify/zkVerify.git)",
+ "aggregate-rpc",
  "async-trait",
  "frame-benchmarking",
  "frame-benchmarking-cli",

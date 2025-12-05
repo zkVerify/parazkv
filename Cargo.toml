@@ -9,8 +9,6 @@ license = "GPL-3.0-only"
 members = [
     "parazkv-node",
     "runtime",
-    "rpc/aggregate",
-    "rpc/aggregate/runtime-api",
     ]
 resolver = "2"
 
@@ -136,8 +134,8 @@ pallet-aggregate = { git = "https://github.com/zkVerify/zkVerify.git", default-f
 hp-dispatch = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
 
 # Aggregation
-aggregate-rpc = { default-features = false, path = "rpc/aggregate" }
-aggregate-rpc-runtime-api = { default-features = false, path = "rpc/aggregate/runtime-api" }
+aggregate-rpc = { default-features = false, git = "https://github.com/zkVerify/zkVerify.git" }
+aggregate-rpc-runtime-api = { default-features = false, git = "https://github.com/zkVerify/zkVerify.git" }
 binary-merkle-tree = { version = "16.0.0", default-features = false }
 
 [patch.crates-io]
