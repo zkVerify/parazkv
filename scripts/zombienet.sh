@@ -71,7 +71,7 @@ zombienet_init() {
   fi
   if [ ! -f $BIN_DIR/zkv-relay-execute-worker ] || [ ! -f $BIN_DIR/zkv-relay-prepare-worker ]; then
    echo "The zkVerify node binary is available, but external workers are missing."
-   exit -1
+   exit 1
   fi
 }
 

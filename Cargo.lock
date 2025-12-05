@@ -11680,6 +11680,7 @@ dependencies = [
  "pallet-transaction-payment-rpc-runtime-api",
  "pallet-ultrahonk-verifier",
  "pallet-ultraplonk-verifier",
+ "pallet-utility",
  "pallet-verifiers",
  "pallet-xcm",
  "parachains-common",

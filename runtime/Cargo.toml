@@ -88,6 +88,7 @@ pallet-sp1-verifier = { workspace = true }
 pallet-plonky2-verifier = { workspace = true }
 static_assertions = "1.1.0"
 pallet-aggregate = { workspace = true }
+pallet-utility = {workspace = true}
 hp-dispatch = { workspace = true }
 aggregate-rpc-runtime-api = { workspace = true }
 
@@ -134,6 +135,7 @@ std = [
 	"pallet-sp1-verifier/std",
 	"pallet-plonky2-verifier/std",
 	"pallet-aggregate/std",
+	"pallet-utility/std",
 	"parachain-info/std",
 	"parachains-common/std",
 	"polkadot-parachain-primitives/std",
@@ -184,6 +186,7 @@ runtime-benchmarks = [
 	"pallet-ultraplonk-verifier/runtime-benchmarks",
 	"pallet-plonky2-verifier/runtime-benchmarks",
 	"pallet-aggregate/runtime-benchmarks",
+	"pallet-utility/runtime-benchmarks",
 	"parachains-common/runtime-benchmarks",
 	"polkadot-parachain-primitives/runtime-benchmarks",
 	"polkadot-runtime-common/runtime-benchmarks",
@@ -213,6 +216,7 @@ try-runtime = [
 	"pallet-xcm/try-runtime",
 	"pallet-verifiers/try-runtime",
 	"pallet-aggregate/try-runtime",
+	"pallet-utility/try-runtime",
 	"parachain-info/try-runtime",
 	"polkadot-runtime-common/try-runtime",
 	"sp-runtime/try-runtime",
