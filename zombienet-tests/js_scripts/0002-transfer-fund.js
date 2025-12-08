@@ -12,9 +12,9 @@
 // by double quotes
 
 const ReturnCode = {
-  Ok: 0,
-  ErrPayerNewBalanceIncorrect: 1,
-  ErrPayeeNewBalanceIncorrect: 2,
+  Ok: 1,
+  ErrPayerNewBalanceIncorrect: 2,
+  ErrPayeeNewBalanceIncorrect: 3,
 };
 
 async function run(nodeName, networkInfo, args) {
@@ -111,11 +111,11 @@ async function run(nodeName, networkInfo, args) {
   console.log(`Alice\'s balance after tx: ${new_balance_alice.toHuman()}`);
   console.log(`Bob\'s balance after tx:   ${new_balance_bob.toHuman()}`);
 
-  if (new_balance_alice >= balance_alice - AMOUNT) {
+  if (new_balance_alice >= Number(balance_alice) - AMOUNT) {
     return ReturnCode.ErrPayerNewBalanceIncorrect;
   }
 
-  if (new_balance_bob != balance_bob + AMOUNT) {
+  if (new_balance_bob != Number(balance_bob) + AMOUNT) {
     return ReturnCode.ErrPayeeNewBalanceIncorrect;
   }
 
