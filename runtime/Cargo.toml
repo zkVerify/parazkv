@@ -94,6 +94,7 @@ aggregate-rpc-runtime-api = { workspace = true }
 [features]
 default = [ "std" ]
 std = [
+	"aggregate-rpc-runtime-api/std",
 	"codec/std",
 	"cumulus-pallet-aura-ext/std",
 	"cumulus-pallet-parachain-system/std",
