@@ -89,6 +89,7 @@ pallet-plonky2-verifier = { workspace = true }
 static_assertions = "1.1.0"
 pallet-aggregate = { workspace = true }
 hp-dispatch = { workspace = true }
+aggregate-rpc-runtime-api = { workspace = true }
 
 [features]
 default = [ "std" ]

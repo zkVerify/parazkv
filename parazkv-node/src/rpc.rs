@@ -39,15 +39,18 @@ where
     C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
     C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
     C::Api: BlockBuilder<Block>,
+    C::Api: aggregate_rpc::AggregateRuntimeApi<Block>,
     P: TransactionPool + Sync + Send + 'static,
 {
     use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
     use substrate_frame_rpc_system::{System, SystemApiServer};
+    use aggregate_rpc::{Aggregate, AggregateApiServer};
 
     let mut module = RpcExtension::new(());
     let FullDeps { client, pool } = deps;
 
     module.merge(System::new(client.clone(), pool).into_rpc())?;
-    module.merge(TransactionPayment::new(client).into_rpc())?;
+    module.merge(TransactionPayment::new(client.clone()).into_rpc())?;
+    module.merge(Aggregate::new(client).into_rpc())?;
     Ok(module)
 }

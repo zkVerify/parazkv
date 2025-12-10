@@ -1027,6 +1027,16 @@ impl_runtime_apis! {
         }
     }
 
+    impl aggregate_rpc_runtime_api::AggregateApi<Block> for Runtime {
+        fn get_statement_path(
+            domain_id: u32,
+            aggregation_id: u64,
+            statement: sp_core::H256
+        ) -> Result<aggregate_rpc_runtime_api::MerkleProof, aggregate_rpc_runtime_api::PathRequestError> {
+            Aggregate::get_statement_path(domain_id, aggregation_id, statement).map(|c| c.into())
+        }
+    }
+
     #[cfg(feature = "try-runtime")]
     impl frame_try_runtime::TryRuntime<Block> for Runtime {
         fn on_runtime_upgrade(checks: frame_try_runtime::UpgradeCheckSelect) -> (Weight, Weight) {

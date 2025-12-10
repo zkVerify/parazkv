@@ -11582,6 +11582,7 @@ dependencies = [
 name = "parazkv-node"
 version = "0.1.0"
 dependencies = [
+ "aggregate-rpc",
  "clap",
  "color-print",
  "cumulus-client-cli",
@@ -11641,6 +11642,7 @@ dependencies = [
 name = "parazkv-runtime"
 version = "0.6.0"
 dependencies = [
+ "aggregate-rpc-runtime-api",
  "cumulus-pallet-aura-ext",
  "cumulus-pallet-parachain-system",
  "cumulus-pallet-session-benchmarking",
