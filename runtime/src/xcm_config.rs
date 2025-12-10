@@ -79,41 +79,6 @@ impl<Network: Get<Option<NetworkId>>, AccountId: From<[u8; 32]> + Into<[u8; 32]>
     }
 }
 
-pub struct LocationAccountId32ToAccountId;
-impl ConvertLocation<AccountId> for LocationAccountId32ToAccountId {
-    fn convert_location(location: &Location) -> Option<AccountId> {
-        use xcm::latest::Junctions::X1;
-        match location.unpack() {
-            (0, [AccountId32 { network, id }]) => {
-                LocationToAccountId::convert_location(&Location {
-                    parents: 0,
-                    interior: X1(alloc::sync::Arc::new([AccountKey20 {
-                        network: *network,
-                        key: id.as_slice()[id.len() - 20..] // take the last 20 bytes
-                            .try_into()
-                            .expect("Cannot convert AccountId32 to AccountKey20"),
-                    }])),
-                })
-            }
-            _ => LocationToAccountId::convert_location(location),
-        }
-    }
-}
-
-/// Means for transacting the native currency on this chain.
-pub type FungibleTransactor = FungibleAdapter<
-    // Use this currency:
-    Balances,
-    // Use this currency when it is a fungible asset matching the given location or name:
-    IsConcrete<RelayLocation>,
-    // Convert an XCM `Location` into a local account ID:
-    LocationAccountId32ToAccountId,
-    // Our chain's account ID type (we can't get away without mentioning it explicitly):
-    AccountId,
-    // We don't track any teleports of `Balances`.
-    (),
->;
-
 /// Means for transacting assets on this chain.
 pub type LocalAssetTransactor = FungibleAdapter<
     // Use this currency:
@@ -129,7 +94,7 @@ pub type LocalAssetTransactor = FungibleAdapter<
 >;
 
 /// Means for transacting assets on this chain.
-pub type AssetTransactors = FungibleTransactor;
+pub type AssetTransactors = LocalAssetTransactor;
 
 /// This is the type we use to convert an (incoming) XCM origin into a local `Origin` instance,
 /// ready for dispatching a transaction with Xcm's `Transact`. There is an `OriginKind` which can
