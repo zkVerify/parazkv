@@ -18,7 +18,31 @@
 //! Expose the auto generated weight files.
 
 pub mod block_weights;
+pub mod cumulus_pallet_parachain_system;
+pub mod cumulus_pallet_xcmp_queue;
 pub mod extrinsic_weights;
+pub mod frame_system;
+pub mod frame_system_extensions;
+pub mod pallet_aggregate;
+pub mod pallet_balances;
+pub mod pallet_collator_selection;
+pub mod pallet_ezkl_verifier;
+pub mod pallet_fflonk_verifier;
+pub mod pallet_groth16_verifier;
+pub mod pallet_message_queue;
+pub mod pallet_plonky2_verifier;
+pub mod pallet_plonky2_verifier_verify_proof;
+pub mod pallet_risc0_verifier;
+pub mod pallet_risc0_verifier_verify_proof;
+pub mod pallet_session;
+pub mod pallet_sp1_verifier;
+pub mod pallet_sudo;
+pub mod pallet_timestamp;
+pub mod pallet_transaction_payment;
+pub mod pallet_ultrahonk_verifier;
+pub mod pallet_ultraplonk_verifier;
+pub mod pallet_utility;
+pub mod pallet_xcm;
 pub mod pallet_xcm_benchmarks;
 pub mod paritydb_weights;
 pub mod rocksdb_weights;

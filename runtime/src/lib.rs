@@ -38,10 +38,10 @@ use frame_support::{
     },
     weights::{
         constants::WEIGHT_REF_TIME_PER_SECOND, ConstantMultiplier, Weight,
-        WeightToFeeCoefficients, WeightToFeePolynomial,
     },
     Blake2_128Concat, Identity, PalletId, StorageHasher,
 };
+use frame_support::traits::Footprint;
 use frame_system::{
     limits::{BlockLength, BlockWeights},
     EnsureRoot,
@@ -58,8 +58,23 @@ pub use sp_runtime::BuildStorage;
 
 // Polkadot imports
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
-
+use sp_runtime::traits::Convert;
 use weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight};
+
+
+pub(crate) mod weight_aliases {
+    pub mod pallet_plonky2_verifier_verify_proof {
+        pub use pallet_plonky2_verifier::WeightInfoVerifyProof as WeightInfo;
+    }
+
+    pub mod pallet_risc0_verifier_verify_proof {
+        pub use pallet_risc0_verifier::WeightInfoVerifyProof as WeightInfo;
+    }
+
+    pub mod frame_system_extensions {
+        pub use frame_system::ExtensionsWeightInfo as WeightInfo;
+    }
+}
 
 // XCM Imports
 // use xcm::latest::prelude::BodyId;
@@ -99,7 +114,7 @@ pub type SignedBlock = generic::SignedBlock<Block>;
 pub type BlockId = generic::BlockId<Block>;
 
 /// The SignedExtension to the basic transaction logic.
-pub type SignedExtra = (
+pub type TxExtension = (
     frame_system::CheckNonZeroSender<Runtime>,
     frame_system::CheckSpecVersion<Runtime>,
     frame_system::CheckTxVersion<Runtime>,
@@ -112,7 +127,7 @@ pub type SignedExtra = (
 
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic =
-    generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>;
+    generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, TxExtension>;
 
 /// Migrations to apply on runtime upgrade.
 pub type Migrations = (
@@ -288,7 +303,9 @@ impl frame_system::Config for Runtime {
     type SS58Prefix = SS58Prefix;
     /// The action to take on a Runtime Upgrade
     type OnSetCode = cumulus_pallet_parachain_system::ParachainSetCode<Self>;
-    type MaxConsumers = frame_support::traits::ConstU32<16>;
+    type MaxConsumers = ConstU32<16>;
+    type SystemWeightInfo = weights::frame_system::ZKVWeight<Runtime>;
+    type ExtensionsWeightInfo = weights::frame_system_extensions::ZKVWeight<Runtime>;
 }
 
 impl pallet_timestamp::Config for Runtime {
@@ -296,7 +313,7 @@ impl pallet_timestamp::Config for Runtime {
     type Moment = u64;
     type OnTimestampSet = Aura;
     type MinimumPeriod = ConstU64<{ SLOT_DURATION / 2 }>;
-    type WeightInfo = ();
+    type WeightInfo = weights::pallet_timestamp::ZKVWeight<Runtime>;
 }
 
 impl pallet_authorship::Config for Runtime {
@@ -313,7 +330,7 @@ impl pallet_balances::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type RuntimeHoldReason = RuntimeHoldReason;
     type RuntimeFreezeReason = RuntimeFreezeReason;
-    type WeightInfo = pallet_balances::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = weights::pallet_balances::ZKVWeight<Runtime>;
     /// The type for recording an account's balance.
     type Balance = Balance;
     type DustRemoval = ();
@@ -345,13 +362,13 @@ impl pallet_transaction_payment::Config for Runtime {
     type LengthToFee = ConstantMultiplier<Balance, TransactionByteFee>;
     type FeeMultiplierUpdate = SlowAdjustingFeeUpdate<Self>;
     type OperationalFeeMultiplier = OperationalFeeMultiplier;
-    type WeightInfo = ();
+    type WeightInfo = weights::pallet_transaction_payment::ZKVWeight<Runtime>;
 }
 
 impl pallet_sudo::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type RuntimeCall = RuntimeCall;
-    type WeightInfo = ();
+    type WeightInfo = weights::pallet_sudo::ZKVWeight<Runtime>;
 }
 
 parameter_types! {
@@ -377,7 +394,7 @@ impl cumulus_pallet_parachain_system::Config for Runtime {
     type XcmpMessageHandler = XcmpQueue;
     type ReservedXcmpWeight = ReservedXcmpWeight;
     type CheckAssociatedRelayNumber = RelayNumberMonotonicallyIncreases;
-    type WeightInfo = ();
+    type WeightInfo = weights::cumulus_pallet_parachain_system::ZKVEvmWeight<Runtime>;
     type ConsensusHook = ConsensusHook;
     type SelectCore = cumulus_pallet_parachain_system::DefaultCoreSelector<Self>;
 }
@@ -406,7 +423,7 @@ impl pallet_session::Config for Runtime {
     // Essentially just Aura, but let's be pedantic.
     type SessionHandler = <SessionKeys as sp_runtime::traits::OpaqueKeys>::KeyTypeIdProviders;
     type Keys = SessionKeys;
-    type WeightInfo = ();
+    type WeightInfo = weights::pallet_session::ZKVWeight<Runtime>;
 }
 
 parameter_types! {
@@ -426,12 +443,6 @@ impl pallet_aura::Config for Runtime {
     type AllowMultipleBlocksPerSlot = AllowMultipleBlocksPerSlot;
     type SlotDuration = ConstU64<SLOT_DURATION>;
 }
-
-// /// We allow root and the StakingAdmin to execute privileged collator selection operations.
-// pub type CollatorSelectionUpdateOrigin = EitherOfDiverse<
-//     EnsureRoot<AccountId>,
-//     EnsureXcm<IsVoiceOfBody<RelayLocation, StakingAdminBodyId>>,
-// >;
 pub type CollatorSelectionUpdateOrigin = EnsureRoot<AccountId>;
 
 impl pallet_collator_selection::Config for Runtime {
@@ -447,14 +458,14 @@ impl pallet_collator_selection::Config for Runtime {
     type ValidatorId = <Self as frame_system::Config>::AccountId;
     type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
     type ValidatorRegistration = Session;
-    type WeightInfo = ();
+    type WeightInfo = weights::pallet_collator_selection::ZKVEvmWeight<Runtime>;
 }
 
 impl pallet_utility::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type RuntimeCall = RuntimeCall;
     type PalletsOrigin = OriginCaller;
-    type WeightInfo = ();
+    type WeightInfo = weights::pallet_utility::ZKVWeight<Runtime>;
 }
 
 mod vk_registration_parameters {
@@ -517,13 +528,36 @@ impl DispatchAggregation<Balance, AccountId> for Runtime {
 }
 
 parameter_types! {
-    pub const AggregateBaseDeposit: Balance = currency::deposit(2, 64);
-    pub const AggregateByteDeposit: Balance = currency::deposit(0, 1);
-    pub const AggregateRegisterHoldReason: RuntimeHoldReason = RuntimeHoldReason::Aggregate(pallet_aggregate::HoldReason::Domain);
+    pub const AggregateDomainBaseDeposit: Balance = currency::deposit(2, 64);
+    pub const AggregateDomainByteDeposit: Balance = currency::deposit(0, 1);
+    pub const AggregateDomainHoldReason: RuntimeHoldReason = RuntimeHoldReason::Aggregate(pallet_aggregate::HoldReason::Domain);
     pub const AggregateBaseTip: Balance = 10 * CENTS;
     pub const AggregateLinearTip: Permill = Permill::from_percent(10);
     pub const AggregateMaxSize: pallet_aggregate::AggregationSize = 128;
     pub const AggregateQueueSize: u32 = 16;
+    pub const AggregateAllowlistHoldBaseDeposit: Balance = currency::deposit(2, 0);
+    // From KeyLenOf di double_map.rs in substrate.
+    // k1.size + k2.size + 2 * Twox128.size = 4 + 32 + 2 * 16 = 68
+    pub const AggregateAllowlistHoldSingleElementDeposit: Balance = currency::deposit(0, 68);
+    pub const AggregateAllowlistHoldReason: RuntimeHoldReason = RuntimeHoldReason::Aggregate(pallet_aggregate::HoldReason::Allowlist);
+}
+
+/// A storage price that increases with the number of items in the storage but not consider the size of the items.
+pub struct StoreItemsStoragePrice<Base, ItemPrice, Balance>(
+    core::marker::PhantomData<(Base, ItemPrice, Balance)>,
+);
+impl<Base, ItemPrice, Balance> Convert<Footprint, Balance>
+for StoreItemsStoragePrice<Base, ItemPrice, Balance>
+where
+    Base: Get<Balance>,
+    ItemPrice: Get<Balance>,
+    Balance: From<u64> + sp_runtime::Saturating,
+{
+    fn convert(a: Footprint) -> Balance {
+        let s: Balance = a.count.into();
+        s.saturating_mul(ItemPrice::get())
+            .saturating_add(Base::get())
+    }
 }
 
 impl pallet_aggregate::Config for Runtime {
@@ -534,13 +568,19 @@ impl pallet_aggregate::Config for Runtime {
     type ManagerOrigin = EnsureRoot<AccountId>;
     type Hold = Balances;
 
-    type Consideration = frame_support::traits::fungible::HoldConsideration<
+    type ConsiderationDomain = HoldConsideration<
         AccountId,
         Balances,
-        AggregateRegisterHoldReason,
-        frame_support::traits::LinearStoragePrice<
-            AggregateBaseDeposit,
-            AggregateByteDeposit,
+        AggregateDomainHoldReason,
+        LinearStoragePrice<AggregateDomainBaseDeposit, AggregateDomainByteDeposit, Balance>,
+    >;
+    type ConsiderationAllowList = HoldConsideration<
+        AccountId,
+        Balances,
+        AggregateAllowlistHoldReason,
+        StoreItemsStoragePrice<
+            AggregateAllowlistHoldBaseDeposit,
+            AggregateAllowlistHoldSingleElementDeposit,
             Balance,
         >,
     >;
@@ -548,7 +588,7 @@ impl pallet_aggregate::Config for Runtime {
 
     type ComputePublisherTip = Linear<AggregateBaseTip, AggregateLinearTip, Balance>;
 
-    type WeightInfo = (); // weights::pallet_aggregate::ZKVWeight<Runtime>;
+    type WeightInfo = weights::pallet_aggregate::ZKVWeight<Runtime>;
 
     #[cfg(feature = "runtime-benchmarks")]
     const AGGREGATION_SIZE: u32 = AggregateMaxSize::get() as u32;
@@ -585,7 +625,7 @@ pub type EzklVerifier = pallet_ezkl_verifier::Ezkl<Runtime>;
 impl pallet_verifiers::Config<EzklVerifier> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type OnProofVerified = Aggregate;
-    type WeightInfo = pallet_ezkl_verifier::EzklWeight<()>;
+    type WeightInfo = pallet_ezkl_verifier::EzklWeight<weights::pallet_ezkl_verifier::ZKVWeight<Runtime>>;
     type Ticket = VkRegistrationHoldConsideration;
     #[cfg(feature = "runtime-benchmarks")]
     type Currency = Balances;
@@ -595,7 +635,7 @@ impl pallet_verifiers::Config<pallet_fflonk_verifier::Fflonk> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type OnProofVerified = Aggregate;
     type Ticket = VkRegistrationHoldConsideration;
-    type WeightInfo = pallet_fflonk_verifier::FflonkWeight<()>;
+    type WeightInfo = pallet_fflonk_verifier::FflonkWeight<weights::pallet_fflonk_verifier::ZKVWeight<Runtime>>;
     #[cfg(feature = "runtime-benchmarks")]
     type Currency = Balances;
 }
@@ -619,7 +659,7 @@ impl pallet_verifiers::Config<pallet_groth16_verifier::Groth16<Runtime>> for Run
     type RuntimeEvent = RuntimeEvent;
     type OnProofVerified = Aggregate;
     type Ticket = VkRegistrationHoldConsideration;
-    type WeightInfo = pallet_groth16_verifier::Groth16Weight<()>; // Mock
+    type WeightInfo = pallet_groth16_verifier::Groth16Weight<weights::pallet_groth16_verifier::ZKVWeight<Runtime>>; // Mock
     #[cfg(feature = "runtime-benchmarks")]
     type Currency = Balances;
 }
@@ -634,14 +674,14 @@ impl pallet_plonky2_verifier::Config for Runtime {
     type MaxProofSize = Plonky2MaxProofSize;
     type MaxPubsSize = Plonky2MaxPubsSize;
     type MaxVkSize = Plonky2MaxVkSize;
-    type WeightInfo = ();
+    type WeightInfo = weights::pallet_plonky2_verifier_verify_proof::ZKVWeight<Runtime>;
 }
 
 impl pallet_verifiers::Config<pallet_plonky2_verifier::Plonky2<Runtime>> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type OnProofVerified = Aggregate;
     type Ticket = VkRegistrationHoldConsideration;
-    type WeightInfo = pallet_plonky2_verifier::Plonky2Weight<()>;
+    type WeightInfo = pallet_plonky2_verifier::Plonky2Weight<weights::pallet_plonky2_verifier::ZKVWeight<Runtime>>;
     #[cfg(feature = "runtime-benchmarks")]
     type Currency = Balances;
 }
@@ -659,7 +699,7 @@ impl pallet_verifiers::Config<pallet_sp1_verifier::Sp1<Runtime>> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type OnProofVerified = Aggregate;
     type Ticket = VkRegistrationHoldConsideration;
-    type WeightInfo = pallet_sp1_verifier::Sp1Weight<()>;
+    type WeightInfo = pallet_sp1_verifier::Sp1Weight<weights::pallet_sp1_verifier::ZKVWeight<Runtime>>;
     #[cfg(feature = "runtime-benchmarks")]
     type Currency = Balances;
 }
@@ -676,14 +716,14 @@ impl pallet_risc0_verifier::Config for Runtime {
     type MaxNSegment = Risc0MaxNSegment;
     type Segment20MaxSize = Risc0Segment20MaxSize;
     type MaxPubsSize = Risc0MaxPubsSize;
-    type WeightInfo = ();
+    type WeightInfo = weights::pallet_risc0_verifier_verify_proof::ZKVWeight<Runtime>;
 }
 
 impl pallet_verifiers::Config<pallet_risc0_verifier::Risc0<Runtime>> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type OnProofVerified = Aggregate;
     type Ticket = VkRegistrationHoldConsideration;
-    type WeightInfo = pallet_risc0_verifier::Risc0Weight<()>;
+    type WeightInfo = pallet_risc0_verifier::Risc0Weight<weights::pallet_risc0_verifier::ZKVWeight<Runtime>>;
     #[cfg(feature = "runtime-benchmarks")]
     type Currency = Balances;
 }
@@ -702,7 +742,7 @@ impl pallet_verifiers::Config<UltrahonkVerifier> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type OnProofVerified = Aggregate;
     type Ticket = VkRegistrationHoldConsideration;
-    type WeightInfo = pallet_ultrahonk_verifier::UltrahonkWeight<()>;
+    type WeightInfo = pallet_ultrahonk_verifier::UltrahonkWeight<weights::pallet_ultrahonk_verifier::ZKVWeight<Runtime>>;
     #[cfg(feature = "runtime-benchmarks")]
     type Currency = Balances;
 }
@@ -721,7 +761,7 @@ impl pallet_verifiers::Config<UltraplonkVerifier> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type OnProofVerified = Aggregate;
     type Ticket = VkRegistrationHoldConsideration;
-    type WeightInfo = pallet_ultraplonk_verifier::UltraplonkWeight<()>;
+    type WeightInfo = pallet_ultraplonk_verifier::UltraplonkWeight<weights::pallet_ultraplonk_verifier::ZKVWeight<Runtime>>;
     #[cfg(feature = "runtime-benchmarks")]
     type Currency = Balances;
 }

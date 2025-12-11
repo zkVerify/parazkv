@@ -232,6 +232,9 @@ async function _handleTransactionLifecycle(api, sendFunction, blockUntil, filter
 }
 
 async function submitExtrinsic(api, extrinsic, signer, blockUntil, filter) {
+    const { nonce }  = await api.query.system.account(signer.address);
+    console.log(`Submitting extrinsic with nonce ${nonce}`);
+
     // Create a function that encapsulates the `signAndSend` call.
     const sendFunction = (callback) => extrinsic.signAndSend(signer, callback);
 

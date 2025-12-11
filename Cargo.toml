@@ -106,7 +106,7 @@ sp-io = { version = "39.0.1", default-features = false }
 sp-timestamp = { version = "35.0.0", default-features = false }
 substrate-frame-rpc-system = { version = "42.0.0" }
 prometheus-endpoint = { version = "0.17.1", package = "substrate-prometheus-endpoint" }
-zkv-cli = { git = "https://github.com/zkVerify/zkVerify.git" }
+zkv-cli = { git = "https://github.com/zkVerify/zkVerify.git", rev="347231680464" }
 polkadot-primitives = { version = "17.1.0", default-features = false }
 cumulus-client-cli = { version = "0.21.1" }
 cumulus-client-collator = { version = "0.21.0" }
@@ -121,28 +121,28 @@ substrate-build-script-utils = { version = "11.0.0" }
 
 # Verifiers
 cumulus-primitives-proof-size-hostfunction = { version = "0.11.0", default-features = false }
-native = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
-pallet-verifiers = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
-pallet-groth16-verifier = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
-pallet-ezkl-verifier = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
-pallet-fflonk-verifier = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
-pallet-risc0-verifier = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
-pallet-ultrahonk-verifier = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
-pallet-ultraplonk-verifier = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
-pallet-sp1-verifier = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
-pallet-plonky2-verifier = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
-pallet-aggregate = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
-hp-dispatch = { git = "https://github.com/zkVerify/zkVerify.git", default-features = false }
+native = { git = "https://github.com/zkVerify/zkVerify.git", rev="347231680464", default-features = false }
+pallet-verifiers = { git = "https://github.com/zkVerify/zkVerify.git", rev="347231680464", default-features = false }
+pallet-groth16-verifier = { git = "https://github.com/zkVerify/zkVerify.git", rev="347231680464", default-features = false }
+pallet-ezkl-verifier = { git = "https://github.com/zkVerify/zkVerify.git", rev="347231680464", default-features = false }
+pallet-fflonk-verifier = { git = "https://github.com/zkVerify/zkVerify.git", rev="347231680464", default-features = false }
+pallet-risc0-verifier = { git = "https://github.com/zkVerify/zkVerify.git", rev="347231680464", default-features = false }
+pallet-ultrahonk-verifier = { git = "https://github.com/zkVerify/zkVerify.git", rev="347231680464", default-features = false }
+pallet-ultraplonk-verifier = { git = "https://github.com/zkVerify/zkVerify.git", rev="347231680464", default-features = false }
+pallet-sp1-verifier = { git = "https://github.com/zkVerify/zkVerify.git", rev="347231680464", default-features = false }
+pallet-plonky2-verifier = { git = "https://github.com/zkVerify/zkVerify.git", rev="347231680464", default-features = false }
+pallet-aggregate = { git = "https://github.com/zkVerify/zkVerify.git", rev="347231680464", default-features = false }
+hp-dispatch = { git = "https://github.com/zkVerify/zkVerify.git", rev="347231680464", default-features = false }
 
 # Aggregation
-aggregate-rpc = { default-features = false, git = "https://github.com/zkVerify/zkVerify.git" }
-aggregate-rpc-runtime-api = { default-features = false, git = "https://github.com/zkVerify/zkVerify.git" }
+aggregate-rpc = { default-features = false, git = "https://github.com/zkVerify/zkVerify.git", rev="347231680464" }
+aggregate-rpc-runtime-api = { default-features = false, git = "https://github.com/zkVerify/zkVerify.git", rev="347231680464" }
 binary-merkle-tree = { version = "16.0.0", default-features = false }
 
 [patch.crates-io]
-cumulus-relay-chain-inprocess-interface = {git = "https://github.com/zkVerify/zkVerify.git", ref = "2bfeeed987d6eda99734f3a65546275b3bb65d36"}
-cumulus-relay-chain-minimal-node = {git = "https://github.com/zkVerify/zkVerify.git", ref = "2bfeeed987d6eda99734f3a65546275b3bb65d36"}
-polkadot-omni-node-lib = {git = "https://github.com/zkVerify/zkVerify.git", ref = "2bfeeed987d6eda99734f3a65546275b3bb65d36"}
+cumulus-relay-chain-inprocess-interface = {git = "https://github.com/zkVerify/zkVerify.git", rev="347231680464" }
+cumulus-relay-chain-minimal-node = {git = "https://github.com/zkVerify/zkVerify.git", rev="347231680464" }
+polkadot-omni-node-lib = {git = "https://github.com/zkVerify/zkVerify.git", rev="347231680464"}
 
 [workspace.lints.clippy]
 all = { level = "allow", priority = 0 }                              # Basically, we accept the _perf_ clippy concerns

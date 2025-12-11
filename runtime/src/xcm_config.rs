@@ -251,88 +251,6 @@ parameter_types! {
     pub const MaxRemoteLockConsumers: u32 = 0;
 }
 
-pub struct XcmWeightMock;
-impl pallet_xcm::WeightInfo for XcmWeightMock {
-    fn send() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn teleport_assets() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn reserve_transfer_assets() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn transfer_assets() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn execute() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn force_xcm_version() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn force_default_xcm_version() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn force_subscribe_version_notify() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn force_unsubscribe_version_notify() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn force_suspension() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn migrate_supported_version() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn migrate_version_notifiers() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn already_notified_target() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn notify_current_targets() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn notify_target_migration_fail() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn migrate_version_notify_targets() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn migrate_and_notify_old_targets() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn new_query() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn take_response() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-
-    fn claim_assets() -> Weight {
-        Weight::from_parts(0, 0)
-    }
-}
 impl pallet_xcm::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type Currency = Balances;
@@ -362,7 +280,7 @@ impl pallet_xcm::Config for Runtime {
     type MaxRemoteLockConsumers = MaxLockers;
     type RemoteLockConsumerIdentifier = ();
 
-    type WeightInfo = XcmWeightMock;
+    type WeightInfo = crate::weights::pallet_xcm::ZKVEvmWeight<Runtime>;
 }
 
 impl cumulus_pallet_xcm::Config for Runtime {
@@ -378,7 +296,7 @@ parameter_types! {
 
 impl pallet_message_queue::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
-    type WeightInfo = ();
+    type WeightInfo = crate::weights::pallet_message_queue::ZKVEvmWeight<Runtime>;
     #[cfg(not(feature = "runtime-benchmarks"))]
     type MessageProcessor = xcm_builder::ProcessXcmMessage<
         AggregateMessageOrigin,
@@ -428,5 +346,5 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
     type ControllerOrigin = EnsureRoot<AccountId>;
     type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
     type PriceForSiblingDelivery = PriceForSiblingParachainDelivery;
-    type WeightInfo = ();
+    type WeightInfo = crate::weights::cumulus_pallet_xcmp_queue::ZKVEvmWeight<Runtime>;
 }
