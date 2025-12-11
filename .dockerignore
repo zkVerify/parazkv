@@ -1,0 +1,9 @@
+/docs
+**/target/
+.dockerignore
+docker/dockerfiles
+scripts
+benchmarking_errors.txt
+zombienet-linux-x64
+relay-bin/
+zombienet*
