@@ -29,7 +29,7 @@ async function run(nodeName, networkInfo, args) {
         V4: {
             parents: '0',
             interior: {
-                X1: [{ Parachain: 1599 }],
+                X1: [{ Parachain: 1999 }],
             },
         },
     };

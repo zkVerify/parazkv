@@ -17,19 +17,20 @@ use crate::{
 
 fn load_spec(id: &str) -> std::result::Result<Box<dyn ChainSpec>, String> {
     Ok(match id {
-        "dev" => Box::new(chain_spec::development_config("volta-local")),
-        dev if dev.ends_with("-dev") => Box::new(chain_spec::development_config(&format!(
-            "{}-local",
-            &dev[..dev.len() - 4]
-        ))),
-        "" | "local" => Box::new(chain_spec::local_testnet_config("volta-local")),
-        local if local.ends_with("-local") => Box::new(chain_spec::local_testnet_config(&format!(
-            "{}-local",
-            &local[..local.len() - 6]
-        ))),
-        path => Box::new(chain_spec::ChainSpec::from_json_file(
-            std::path::PathBuf::from(path),
-        )?),
+        // Volta
+        "" | "test" | "testnet" | "volta" => {
+            todo!("Box::new(GenericChainSpec::from_json_bytes(
+                &include_bytes!(\"../chain-specs/vflow_volta.json\")[..],
+            )?")
+        },
+        "testnet_build" | "volta_build" => Box::new(chain_spec::volta_config()?),
+        "dev" | "volta_dev" | "testnet_dev" => Box::new(chain_spec::volta_development_config()?),
+        "volta_local" | "testnet_local" => Box::new(chain_spec::volta_local_testnet_config()?),
+
+        // Custom
+        path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(
+            path,
+        ))?),
     })
 }
 

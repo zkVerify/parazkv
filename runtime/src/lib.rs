@@ -11,7 +11,7 @@ pub mod xcm_config;
 
 extern crate alloc;
 use alloc::borrow::Cow;
-use alloc::{vec, vec::Vec};
+use alloc::{vec::Vec};
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
 use currency::CENTS;
 use pallet_aura::Authorities;
@@ -52,6 +52,7 @@ pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 pub use sp_runtime::{MultiAddress, Perbill, Permill};
 
 pub mod types;
+mod genesis_config_presets;
 
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
@@ -176,7 +177,7 @@ impl_opaque_keys! {
 
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: Cow::Borrowed("parazkv"),
+    spec_name: Cow::Borrowed("parazkv-runtime"),
     impl_name: Cow::Borrowed("parazkv"),
     authoring_version: 1,
     spec_version: 1_000,
@@ -1083,11 +1084,11 @@ impl_runtime_apis! {
         }
 
         fn get_preset(id: &Option<sp_genesis_builder::PresetId>) -> Option<Vec<u8>> {
-            get_preset::<RuntimeGenesisConfig>(id, |_| None)
+            get_preset::<RuntimeGenesisConfig>(id, &genesis_config_presets::get_preset)
         }
 
         fn preset_names() -> Vec<sp_genesis_builder::PresetId> {
-            vec![]
+           genesis_config_presets::preset_names()
         }
     }
 

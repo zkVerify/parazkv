@@ -1,23 +1,37 @@
-use cumulus_primitives_core::ParaId;
-use parazkv_runtime::{AccountId, AuraId, Signature, EXISTENTIAL_DEPOSIT};
-use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
+// Copyright 2025, Horizen Labs, Inc.
+// Copyright (C) Parity Technologies (UK) Ltd.
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup, Properties};
+use sc_cli::RuntimeVersion;
+use sc_network::config::MultiaddrWithPeerId;
 use sc_service::ChainType;
+use sc_telemetry::TelemetryEndpoints;
 use serde::{Deserialize, Serialize};
-use sp_core::{sr25519, Pair, Public};
-use sp_runtime::traits::{IdentifyAccount, Verify};
+use sp_runtime::Cow;
+use std::str;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<Extensions>;
 
-// /// The default XCM version to set in genesis config.
-// const SAFE_XCM_VERSION: u32 = xcm::prelude::XCM_VERSION;
+// The URL for the telemetry server.
+const TELEMETRY_URL: &str = "wss://telemetry.zkverify.io/submit/";
 
-/// Helper function to generate a crypto pair from seed
-pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
-    TPublic::Pair::from_string(&format!("//{seed}"), None)
-        .expect("static values are valid; qed")
-        .public()
-}
+const SPEC_NAME: &str = "parazkv-runtime";
+
+const PARA_ID: u32 = 1999;
 
 /// The extensions for the [`ChainSpec`].
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ChainSpecGroup, ChainSpecExtension)]
@@ -36,171 +50,110 @@ impl Extensions {
     }
 }
 
-type AccountPublic = <Signature as Verify>::Signer;
-
-/// Generate collator keys from seed.
-///
-/// This function's return type must always match the session keys of the chain in tuple format.
-pub fn get_collator_keys_from_seed(seed: &str) -> AuraId {
-    get_from_seed::<AuraId>(seed)
+fn check_correct_runtime(iname: &str, runtime: RuntimeVersion) -> Result<(), String> {
+    if let RuntimeVersion {
+        spec_name: Cow::Borrowed(name),
+        ..
+    } = runtime
+    {
+        if name == iname {
+            return Ok(());
+        } else {
+            return Err(format!("Requested {iname} runtime, but compiled for {name}").to_string());
+        }
+    }
+    Err("Unexpected runtime version type".to_string())
 }
 
-/// Helper function to generate an account ID from seed
-pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
-where
-    AccountPublic: From<<TPublic::Pair as Pair>::Public>,
-{
-    AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
+fn boot_node_address(dns: &str, peer_id: &str) -> impl Iterator<Item = MultiaddrWithPeerId> {
+    vec![
+        format!("/dns/{dns}/tcp/30333/p2p/{peer_id}"),
+        format!("/dns/{dns}/tcp/30334/ws/p2p/{peer_id}"),
+        format!("/dns/{dns}/tcp/443/wss/p2p/{peer_id}"),
+    ]
+    .into_iter()
+    .map(|s| s.parse().expect("Valid address. qed"))
 }
 
-/// Generate the session keys from individual elements.
-///
-/// The input must be a tuple of individual keys (a single arg for now since we have just one key).
-pub fn template_session_keys(keys: AuraId) -> parazkv_runtime::SessionKeys {
-    parazkv_runtime::SessionKeys { aura: keys }
+fn chain_properties() -> Properties {
+    [
+        (
+            "ss58Format".to_string(),
+            serde_json::Value::from(crate::SS58_PREFIX),
+        ),
+        ("tokenSymbol".to_string(), serde_json::Value::from("tVFY")),
+        ("tokenDecimals".to_string(), serde_json::Value::from(18_u8)),
+    ]
+        .into_iter()
+        .collect()
 }
 
-const PARA_ID: u32 = 1_599;
+pub fn volta_development_config() -> Result<ChainSpec, String> {
+    check_correct_runtime(SPEC_NAME, parazkv_runtime::VERSION)?;
 
-pub fn development_config(relay: &str) -> ChainSpec {
-    // Give your base currency a unit name and decimal places
-    let mut properties = sc_chain_spec::Properties::new();
-    // properties.insert("tokenSymbol".into(), "UNIT".into());
-    // properties.insert("tokenDecimals".into(), 12.into());
-    properties.insert("tokenSymbol".into(), "tVFY".into());
-    properties.insert("tokenDecimals".into(), 18.into());
-    properties.insert("ss58Format".into(), 42.into());
-
-    ChainSpec::builder(
-        parazkv_runtime::WASM_BINARY.expect("WASM binary was not built, please build it!"),
+    Ok(ChainSpec::builder(
+        parazkv_runtime::WASM_BINARY.ok_or_else(|| "Volta wasm not available".to_string())?,
         Extensions {
-            relay_chain: relay.into(),
-            // You MUST set this to the correct network!
+            relay_chain: "volta-local".into(),
             para_id: PARA_ID,
         },
     )
-    .with_name("Development")
-    .with_id("dev")
+    .with_name("Volta Development")
+    .with_id("volta_dev")
     .with_chain_type(ChainType::Development)
-    .with_genesis_config_patch(testnet_genesis(
-        // initial collators.
-        vec![
-            (
-                get_account_id_from_seed::<sr25519::Public>("Alice"),
-                get_collator_keys_from_seed("Alice"),
-            ),
-            (
-                get_account_id_from_seed::<sr25519::Public>("Bob"),
-                get_collator_keys_from_seed("Bob"),
-            ),
-        ],
-        vec![
-            get_account_id_from_seed::<sr25519::Public>("Alice"),
-            get_account_id_from_seed::<sr25519::Public>("Bob"),
-            get_account_id_from_seed::<sr25519::Public>("Charlie"),
-            get_account_id_from_seed::<sr25519::Public>("Dave"),
-            get_account_id_from_seed::<sr25519::Public>("Eve"),
-            get_account_id_from_seed::<sr25519::Public>("Ferdie"),
-            get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-            get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-            get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
-            get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
-            get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
-            get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-        ],
-        get_account_id_from_seed::<sr25519::Public>("Alice"),
-        PARA_ID.into(),
-    ))
-    .build()
+    .with_properties(chain_properties())
+    .with_genesis_config_preset_name("development")
+    .build())
 }
 
-pub fn local_testnet_config(relay: &str) -> ChainSpec {
-    // Give your base currency a unit name and decimal places
-    let mut properties = sc_chain_spec::Properties::new();
-    // properties.insert("tokenSymbol".into(), "UNIT".into());
-    // properties.insert("tokenDecimals".into(), 12.into());
-    properties.insert("tokenSymbol".into(), "tVFY".into());
-    properties.insert("tokenDecimals".into(), 18.into());
-    properties.insert("ss58Format".into(), 42.into());
+pub fn volta_local_testnet_config() -> Result<ChainSpec, String> {
+    check_correct_runtime(SPEC_NAME, parazkv_runtime::VERSION)?;
 
-    #[allow(deprecated)]
-    ChainSpec::builder(
-        parazkv_runtime::WASM_BINARY.expect("WASM binary was not built, please build it!"),
+    Ok(ChainSpec::builder(
+        parazkv_runtime::WASM_BINARY.ok_or_else(|| "Volta wasm not available".to_string())?,
         Extensions {
-            relay_chain: relay.into(),
-            // You MUST set this to the correct network!
+            relay_chain: "volta-local".into(),
             para_id: PARA_ID,
         },
     )
-    .with_name("Local Testnet")
-    .with_id("local_testnet")
+    .with_name("Volta Local Testnet")
+    .with_id("volta_local_testnet")
     .with_chain_type(ChainType::Local)
-    .with_genesis_config_patch(testnet_genesis(
-        // initial collators.
-        vec![
-            (
-                get_account_id_from_seed::<sr25519::Public>("Alice"),
-                get_collator_keys_from_seed("Alice"),
-            ),
-            (
-                get_account_id_from_seed::<sr25519::Public>("Bob"),
-                get_collator_keys_from_seed("Bob"),
-            ),
-        ],
-        vec![
-            get_account_id_from_seed::<sr25519::Public>("Alice"),
-            get_account_id_from_seed::<sr25519::Public>("Bob"),
-            get_account_id_from_seed::<sr25519::Public>("Charlie"),
-            get_account_id_from_seed::<sr25519::Public>("Dave"),
-            get_account_id_from_seed::<sr25519::Public>("Eve"),
-            get_account_id_from_seed::<sr25519::Public>("Ferdie"),
-            get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-            get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-            get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
-            get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
-            get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
-            get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-        ],
-        get_account_id_from_seed::<sr25519::Public>("Alice"),
-        PARA_ID.into(),
-    ))
-    .with_protocol_id("template-local")
-    .with_properties(properties)
-    .build()
+    .with_protocol_id("volta_local_testnet")
+    .with_properties(chain_properties())
+    .with_genesis_config_preset_name("local_testnet")
+    .build())
 }
 
-fn testnet_genesis(
-    invulnerables: Vec<(AccountId, AuraId)>,
-    endowed_accounts: Vec<AccountId>,
-    root: AccountId,
-    id: ParaId,
-) -> serde_json::Value {
-    serde_json::json!({
-        "balances": {
-            "balances": endowed_accounts.iter().cloned().map(|k| (k, 2_000_000_000_000_000_000_000_u128)).collect::<Vec<_>>(),
+pub fn volta_config() -> Result<ChainSpec, String> {
+    check_correct_runtime(SPEC_NAME, parazkv_runtime::VERSION)?;
+
+    // The connection strings for bootnodes
+    const BOOTNODE_1_DNS: &str = "boot-node-parazkv-volta-1.zkverify.io";
+    const BOOTNODE_1_PEER_ID: &str = "12D3KooWNsjidEzEe8waFt68eLv7iPGJHZkSgy4meUKvhK7TAYg6";
+
+    Ok(ChainSpec::builder(
+        parazkv_runtime::WASM_BINARY.ok_or_else(|| "Volta wasm not available".to_string())?,
+        Extensions {
+            relay_chain: "volta".into(),
+            para_id: PARA_ID,
         },
-        "parachainInfo": {
-            "parachainId": id,
-        },
-        "collatorSelection": {
-            "invulnerables": invulnerables.iter().cloned().map(|(acc, _)| acc).collect::<Vec<_>>(),
-            "candidacyBond": EXISTENTIAL_DEPOSIT * 16,
-        },
-        "session": {
-            "keys": invulnerables
-                .into_iter()
-                .map(|(acc, aura)| {
-                    (
-                        acc.clone(),                 // account id
-                        acc,                         // validator id
-                        template_session_keys(aura), // session keys
-                    )
-                })
-            .collect::<Vec<_>>(),
-        },
-        // "polkadotXcm": {
-        // 	"safeXcmVersion": Some(SAFE_XCM_VERSION),
-        // },
-        "sudo": { "key": Some(root) }
-    })
+    )
+    .with_name("ParaZkv Volta")
+    .with_id("parazkv_testnet")
+    .with_chain_type(ChainType::Live)
+    .with_protocol_id("tparazkv")
+    .with_boot_nodes(
+        boot_node_address(BOOTNODE_1_DNS, BOOTNODE_1_PEER_ID).collect(),
+    )
+    .with_properties(chain_properties())
+    .with_genesis_config_preset_name("volta")
+    .with_telemetry_endpoints(
+        TelemetryEndpoints::new(vec![(
+            TELEMETRY_URL.to_string(),
+            sc_telemetry::CONSENSUS_INFO,
+        )])
+        .expect("Horizen Labs telemetry url is valid; qed"),
+    )
+    .build())
 }

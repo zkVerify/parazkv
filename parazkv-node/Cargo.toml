@@ -2,7 +2,7 @@
 name = "parazkv-node"
 version = "0.1.0"
 authors.workspace = true
-description = "A new Cumulus FRAME-based Substrate Node, ready for hacking together a parachain."
+description = "A zkVerify parachain for verifying proofs."
 license = "Unlicense"
 homepage = "https://substrate.io"
 repository.workspace = true

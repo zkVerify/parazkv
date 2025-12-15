@@ -28,7 +28,7 @@ validator = true
 #validator = true
 #
 [[parachains]]
-id = 1599
+id = 1999
 chain = "local"
 add_to_genesis = true
 cumulus_based = true
