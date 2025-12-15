@@ -1,13 +1,13 @@
 version: '3'
 services:
   relay_alice:
-    image: zkverify/relay-node:latest
+    image: zkverify/relay-node:fast-runtime
     volumes:
       - ../../staging/relay-spec-raw.json:/data/chain_spec.json
     env_file:
       - ../resources/envs/relaychain/.env.alice
   relay_bob:
-    image: zkverify/relay-node:latest
+    image: zkverify/relay-node:fast-runtime
     volumes:
       - ../../staging/relay-spec-raw.json:/data/chain_spec.json
     env_file:
