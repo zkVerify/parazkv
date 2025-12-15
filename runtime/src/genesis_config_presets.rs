@@ -236,7 +236,7 @@ fn genesis(
             "candidacyBond": 100,
             "desiredCandidates": 0,
         },
-        "zkvXcm": {
+        "xcmPallet": {
             "safeXcmVersion": Some(SAFE_XCM_VERSION),
         },
         "sudo": { "key": Some(root_key) },
