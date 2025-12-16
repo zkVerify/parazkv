@@ -19,9 +19,9 @@ fn load_spec(id: &str) -> std::result::Result<Box<dyn ChainSpec>, String> {
     Ok(match id {
         // Volta
         "" | "test" | "testnet" | "volta" => {
-            todo!("Box::new(GenericChainSpec::from_json_bytes(
-                &include_bytes!(\"../chain-specs/vflow_volta.json\")[..],
-            )?")
+            Box::new(chain_spec::ChainSpec::from_json_bytes(
+                &include_bytes!("../chain-specs/parazkv_volta.json")[..],
+            )?)
         },
         "testnet_build" | "volta_build" => Box::new(chain_spec::volta_config()?),
         "dev" | "volta_dev" | "testnet_dev" => Box::new(chain_spec::volta_development_config()?),
@@ -248,7 +248,7 @@ pub fn run() -> Result<()> {
 
                 let para_id = chain_spec::Extensions::try_get(&*config.chain_spec)
                     .map(|e| e.para_id)
-                    .ok_or("Could not find parachain ID in chain-spec.")?;
+                    .ok_or("Could not find parachain ID in chain-specs.")?;
 
                 let polkadot_cli = RelayChainCli::new(
                     &config,
