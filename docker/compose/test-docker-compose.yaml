@@ -13,7 +13,7 @@ services:
     env_file:
       - ../resources/envs/relaychain/.env.bob
 
-  para_alith:
+  para_alice:
     image: zkverify/parazkv-node:local
     volumes:
       - ../../staging/relay-spec-raw.json:/data/relay-chain_spec.json
@@ -21,14 +21,14 @@ services:
       # Uncomment this if you want (for dev purposes) to override the build in the docker image with your own local one
       #- ../../target/release/parazkv-node:/usr/local/bin/parazkv-node
     env_file:
-      - ../resources/envs/parachain/.env.alith
-  para_baltathar:
+      - ../resources/envs/parachain/.env.alice
+  para_bob:
     image: zkverify/parazkv-node:local
     volumes:
       - ../../staging/relay-spec-raw.json:/data/relay-chain_spec.json
       - ../../staging/para-spec-raw.json:/data/para-chain_spec.json
     env_file:
-      - ../resources/envs/parachain/.env.baltathar
+      - ../resources/envs/parachain/.env.bob
   para_rpc:
     image: zkverify/parazkv-node:local
     volumes:

@@ -52,7 +52,7 @@ docker run --entrypoint zkv-relay --rm -v ../../staging/relay-spec.json:/tmp/rel
 docker run --rm --entrypoint parazkv-node zkverify/parazkv-node:local build-spec --chain local --disable-default-bootnode > ../../staging/para-spec.json
 ```
 Before the next step, you can modify it if you want to change any parameter or add preminted account.<br>
-The generated one is already configured to use the as initial collators the ones defined in docker/resources/envs/parachain. (Alith and Baltathar)<br>
+The generated one is already configured to use the as initial collators the ones defined in docker/resources/envs/parachain. (Alice and Bob)<br>
 
 5- Generate **parachain** raw spec:
 
