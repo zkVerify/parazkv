@@ -66,7 +66,7 @@ docker run --rm -v ../../staging/para-spec.json:/tmp/para-spec.json --entrypoint
 docker run --rm -v ../../staging/para-spec-raw.json:/tmp/para-spec-raw.json --entrypoint parazkv-node zkverify/parazkv-node:local export-genesis-wasm --chain /tmp/para-spec-raw.json > ../../staging/para-genesis.wasm
 ```
 
-7- Generate **parachain** geneis state
+7- Generate **parachain** genesis state
 
 ```bash
 docker run --rm -v ../../staging/para-spec-raw.json:/tmp/para-spec-raw.json --entrypoint parazkv-node zkverify/parazkv-node:local export-genesis-state --chain /tmp/para-spec-raw.json > ../../staging/para-genesis-state
@@ -75,7 +75,7 @@ docker run --rm -v ../../staging/para-spec-raw.json:/tmp/para-spec-raw.json --en
 8- Start the nodes with
 
 ```bash
-docker compose -f ./docker/compose/test-docker-compose.yaml up
+docker compose -f ../../docker/compose/test-docker-compose.yaml up
 ```
 
 All the nodes should be up and running now! <br>
