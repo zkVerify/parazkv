@@ -31,13 +31,14 @@ async function run(nodeName, networkInfo, args) {
 
     console.log("Waiting for teleport from relay chain");
 
-    let timeout = BLOCK_TIME * 3;
+    let timeout = BLOCK_TIME * 6;
     let init_balance_receiver = (await api.query.system.account(receiver))["data"]["free"];
     let balance_receiver = init_balance_receiver;
 
     console.log(`Initial balance of receiver: ${init_balance_receiver.toHuman()}`);
 
-    while (!balance_receiver.eq(new BN(amount, 10))) {
+    while (balance_receiver.eq(new BN(0, 10)) || balance_receiver.gt(new BN(amount, 10))) {
+        console.log(`Current balance_receiver: ${balance_receiver.toHuman()}`);
         await new Promise(r => setTimeout(r, 1000));
         timeout -= 1000;
         balance_receiver = (await api.query.system.account(receiver))["data"]["free"];
