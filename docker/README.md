@@ -27,29 +27,30 @@ docker/compose/test-docker-compose.yaml
 ```
 Before executing it you need to generate also the chain descriptors for both chains, and after the startup of the nodes you will need to register the parachain manually in the relay chain.<br>
 Here are the full steps:<br>
-<i>(All the commands are assumed to be executed from the docker/dockerfiles/ folder)</i>
+<i>(All the commands are assumed to be executed from the `docker/` folder)</i>
 
 1- Create the staging directory at the root:
 ```bash
-mkdir ../../staging
+mkdir ../staging
 ```
 
 2- Generate **relaychain** spec:
 
 ```bash
-docker run --entrypoint zkv-relay --rm zkverify/relay-node:fast-runtime  build-spec --disable-default-bootnode --chain local  > ../../staging/relay-spec.json
+docker run --entrypoint zkv-relay --rm zkverify/relay-node:fast-runtime  build-spec --disable-default-bootnode --chain local  > ../staging/relay-spec.json
 ```
+If you need to change something in the spec (like adding preminted accounts) you can modify the generated file before the next step.
 
 3- Generate **relaychain** raw spec:
 
 ```bash
-docker run --entrypoint zkv-relay --rm -v ./../../staging/relay-spec.json:/tmp/relay-spec.json zkverify/relay-node:fast-runtime build-spec --chain local --disable-default-bootnode --raw > ../../staging/relay-spec-raw.json
+docker run --entrypoint zkv-relay --rm -v ./../staging/relay-spec.json:/tmp/relay-spec.json zkverify/relay-node:fast-runtime build-spec --chain local --disable-default-bootnode --raw > ../staging/relay-spec-raw.json
 ```
 
 4- Generate **parachain** spec:
 
 ```bash
-docker run --rm --entrypoint parazkv-node zkverify/parazkv-node:local build-spec --chain local --disable-default-bootnode > ../../staging/para-spec.json
+docker run --rm --entrypoint parazkv-node zkverify/parazkv-node:local build-spec --chain local --disable-default-bootnode > ../staging/para-spec.json
 ```
 Before the next step, you can modify it if you want to change any parameter or add preminted account.<br>
 The generated one is already configured to use the as initial collators the ones defined in docker/resources/envs/parachain. (Alice and Bob)<br>
@@ -57,25 +58,25 @@ The generated one is already configured to use the as initial collators the ones
 5- Generate **parachain** raw spec:
 
 ```bash
-docker run --rm -v ./../../staging/para-spec.json:/tmp/para-spec.json --entrypoint parazkv-node zkverify/parazkv-node:local build-spec --chain /tmp/para-spec.json  --disable-default-bootnode --raw > ../../staging/para-spec-raw.json
+docker run --rm -v ./../staging/para-spec.json:/tmp/para-spec.json --entrypoint parazkv-node zkverify/parazkv-node:local build-spec --chain /tmp/para-spec.json  --disable-default-bootnode --raw > ../staging/para-spec-raw.json
 ```
 
 6- Generate **parachain** wasm
 
 ```bash
-docker run --rm -v ./../../staging/para-spec-raw.json:/tmp/para-spec-raw.json --entrypoint parazkv-node zkverify/parazkv-node:local export-genesis-wasm --chain /tmp/para-spec-raw.json > ../../staging/para-genesis.wasm
+docker run --rm -v ./../staging/para-spec-raw.json:/tmp/para-spec-raw.json --entrypoint parazkv-node zkverify/parazkv-node:local export-genesis-wasm --chain /tmp/para-spec-raw.json > ../staging/para-genesis.wasm
 ```
 
 7- Generate **parachain** genesis state
 
 ```bash
-docker run --rm -v ./../../staging/para-spec-raw.json:/tmp/para-spec-raw.json --entrypoint parazkv-node zkverify/parazkv-node:local export-genesis-state --chain /tmp/para-spec-raw.json > ../../staging/para-genesis-state
+docker run --rm -v ./../staging/para-spec-raw.json:/tmp/para-spec-raw.json --entrypoint parazkv-node zkverify/parazkv-node:local export-genesis-state --chain /tmp/para-spec-raw.json > ../staging/para-genesis-state
 ```
 
 8- Start the nodes with
 
 ```bash
-docker compose -f ../../docker/compose/test-docker-compose.yaml up
+docker compose -f compose/test-docker-compose.yaml up
 ```
 
 All the nodes should be up and running now! <br>
