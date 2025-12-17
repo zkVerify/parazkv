@@ -26,7 +26,7 @@ use sp_core::{sr25519, Pair, Public};
 use sp_genesis_builder::PresetId;
 use sp_runtime::traits::IdentifyAccount;
 
-const PARA_ID : u32 = 1999;
+const PARA_ID : u32 = 1599;
 
 const ENDOWMENT: Balance = 1_000_000 * UNIT;
 const DEFAULT_ENDOWED_SEEDS: [&str; 6] = ["Alice", "Bob", "Charlie", "Dave", "Eve", "Ferdie"];

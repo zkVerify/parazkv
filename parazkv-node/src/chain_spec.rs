@@ -31,7 +31,7 @@ const TELEMETRY_URL: &str = "wss://telemetry.zkverify.io/submit/";
 
 const SPEC_NAME: &str = "parazkv-runtime";
 
-const PARA_ID: u32 = 1999;
+const PARA_ID: u32 = 1599;
 
 /// The extensions for the [`ChainSpec`].
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ChainSpecGroup, ChainSpecExtension)]

@@ -25,7 +25,7 @@ max_candidate_depth = 3
 allowed_ancestry_len = 2
 
 [[parachains]]
-id = 1999
+id = 1599
 add_to_genesis = true
 cumulus_based = true
 chain = "local"

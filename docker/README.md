@@ -43,7 +43,7 @@ docker run --entrypoint zkv-relay --rm zkverify/relay-node:fast-runtime  build-s
 3- Generate **relaychain** raw spec:
 
 ```bash
-docker run --entrypoint zkv-relay --rm -v ../../staging/relay-spec.json:/tmp/relay-spec.json zkverify/relay-node:fast-runtime build-spec --chain local --disable-default-bootnode --raw > ../../staging/relay-spec-raw.json
+docker run --entrypoint zkv-relay --rm -v ./../../staging/relay-spec.json:/tmp/relay-spec.json zkverify/relay-node:fast-runtime build-spec --chain local --disable-default-bootnode --raw > ../../staging/relay-spec-raw.json
 ```
 
 4- Generate **parachain** spec:
@@ -57,19 +57,19 @@ The generated one is already configured to use the as initial collators the ones
 5- Generate **parachain** raw spec:
 
 ```bash
-docker run --rm -v ../../staging/para-spec.json:/tmp/para-spec.json --entrypoint parazkv-node zkverify/parazkv-node:local build-spec --chain /tmp/para-spec.json  --disable-default-bootnode --raw > ../../staging/para-spec-raw.json
+docker run --rm -v ./../../staging/para-spec.json:/tmp/para-spec.json --entrypoint parazkv-node zkverify/parazkv-node:local build-spec --chain /tmp/para-spec.json  --disable-default-bootnode --raw > ../../staging/para-spec-raw.json
 ```
 
 6- Generate **parachain** wasm
 
 ```bash
-docker run --rm -v ../../staging/para-spec-raw.json:/tmp/para-spec-raw.json --entrypoint parazkv-node zkverify/parazkv-node:local export-genesis-wasm --chain /tmp/para-spec-raw.json > ../../staging/para-genesis.wasm
+docker run --rm -v ./../../staging/para-spec-raw.json:/tmp/para-spec-raw.json --entrypoint parazkv-node zkverify/parazkv-node:local export-genesis-wasm --chain /tmp/para-spec-raw.json > ../../staging/para-genesis.wasm
 ```
 
 7- Generate **parachain** genesis state
 
 ```bash
-docker run --rm -v ../../staging/para-spec-raw.json:/tmp/para-spec-raw.json --entrypoint parazkv-node zkverify/parazkv-node:local export-genesis-state --chain /tmp/para-spec-raw.json > ../../staging/para-genesis-state
+docker run --rm -v ./../../staging/para-spec-raw.json:/tmp/para-spec-raw.json --entrypoint parazkv-node zkverify/parazkv-node:local export-genesis-state --chain /tmp/para-spec-raw.json > ../../staging/para-genesis-state
 ```
 
 8- Start the nodes with
