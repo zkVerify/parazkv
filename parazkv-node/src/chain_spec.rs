@@ -121,7 +121,7 @@ pub fn volta_local_testnet_config() -> Result<ChainSpec, String> {
     .with_chain_type(ChainType::Local)
     .with_protocol_id("volta_local_testnet")
     .with_properties(chain_properties())
-    .with_genesis_config_preset_name("local_testnet")
+    .with_genesis_config_preset_name("local")
     .build())
 }
 

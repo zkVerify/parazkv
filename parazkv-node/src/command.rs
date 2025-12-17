@@ -25,7 +25,7 @@ fn load_spec(id: &str) -> std::result::Result<Box<dyn ChainSpec>, String> {
         },
         "testnet_build" | "volta_build" => Box::new(chain_spec::volta_config()?),
         "dev" | "volta_dev" | "testnet_dev" => Box::new(chain_spec::volta_development_config()?),
-        "volta_local" | "testnet_local" => Box::new(chain_spec::volta_local_testnet_config()?),
+        "local" | "volta_local" | "testnet_local" => Box::new(chain_spec::volta_local_testnet_config()?),
 
         // Custom
         path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(
