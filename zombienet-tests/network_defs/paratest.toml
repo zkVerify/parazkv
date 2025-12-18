@@ -1,0 +1,44 @@
+[relaychain]
+default_command = "zkv-relay"
+default_args = []
+chain = "local"
+
+[[relaychain.nodes]]
+name = "alice"
+validator = true
+
+[[relaychain.nodes]]
+name = "bob"
+validator = true
+
+[[relaychain.nodes]]
+name = "charlie"
+validator = true
+
+[[relaychain.nodes]]
+name = "dave"
+validator = true
+
+[[relaychain.nodes]]
+name = "eve"
+validator = true
+
+[[relaychain.nodes]]
+name = "ferdie"
+validator = true
+
+[[parachains]]
+id = 1599
+chain = "local"
+add_to_genesis = true
+cumulus_based = true
+
+[[parachains.collators]]
+name = "collator-alice"
+command = "parazkv-node"
+args = []
+
+[[parachains.collators]]
+name = "collator-bob"
+command = "parazkv-node"
+args = []

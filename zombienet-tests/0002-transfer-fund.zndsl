@@ -1,0 +1,12 @@
+Description: Parachain funds transfer
+Network: ./network_defs/paratest.toml
+Creds: config
+
+alice: is up
+bob: is up
+
+alice: parachain 1599 is registered within 50 seconds
+alice: parachain 1599 block height is at least 2 within 100 seconds
+collator-alice: reports block height is at least 3 within 100 seconds
+
+collator-alice: js-script ./js_scripts/0002-transfer-fund.js return is equal to 1 within 200 seconds
