@@ -25,19 +25,22 @@ async function run(nodeName, networkInfo, args) {
     const keyring = new zombie.Keyring({ type: 'sr25519' });
 
     const amount = args[0];
-    const receiver = args[1]; // decodeAddress(args[1]);
+    const receiver = args[1];
 
     // Check that we receive the teleport from the relay chain w/ the correct parameters
 
     console.log("Waiting for teleport from relay chain");
 
-    let timeout = BLOCK_TIME * 6;
+    let timeout = BLOCK_TIME * 3;
     let init_balance_receiver = (await api.query.system.account(receiver))["data"]["free"];
     let balance_receiver = init_balance_receiver;
 
     console.log(`Initial balance of receiver: ${init_balance_receiver.toHuman()}`);
 
-    while (balance_receiver.eq(new BN(0, 10)) || balance_receiver.gt(new BN(amount, 10))) {
+    // We use an account that cannot have founds in the genesis. So we just wait if it receives some founds
+    // before timeout. We cannot check for the exact amount because of teleport will charge the weigh cost fee to
+    // the receiver.
+    while (balance_receiver.lt(new BN(amount, 10))) {
         console.log(`Current balance_receiver: ${balance_receiver.toHuman()}`);
         await new Promise(r => setTimeout(r, 1000));
         timeout -= 1000;
@@ -50,7 +53,7 @@ async function run(nodeName, networkInfo, args) {
 
     console.log(`Received balance: ${balance_receiver.toHuman()}`);
 
-    if (balance_receiver <= init_balance_receiver) {
+    if (balance_receiver <= amount) {
         return ReturnCode.ExtrinsicUnsuccessful;
     }
 
